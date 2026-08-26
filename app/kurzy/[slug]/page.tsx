@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CourseTerm from "@/components/courses/CourseTerm";
 import { getCourseBySlug } from "@/lib/data/courses";
+import type { Course } from "@/types/course";
+import type { CourseLevel, CourseCategory } from "@/types/course";
 
 type CourseDetailPageProps = {
   params: Promise<{
@@ -9,13 +11,13 @@ type CourseDetailPageProps = {
   }>;
 };
 
-const levelLabels = {
+const levelLabels: Record<CourseLevel, string> = {
   beginner: "Začiatočník",
   intermediate: "Mierne pokročilý",
   advanced: "Pokročilý",
 };
 
-const categoryLabels = {
+const categoryLabels: Record<CourseCategory, string> = {
   children: "Deti",
   adults: "Dospelí",
   individual: "Individuálne plávanie",

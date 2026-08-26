@@ -7,7 +7,7 @@ import type {
   CourseStatus,
   CourseTerm,
   DayOfWeek,
-} from "@/types/Course";
+} from "@/types/course";
 
 /**
  * ============================================================
@@ -20,31 +20,29 @@ type RegistrationStatus = "pending" | "confirmed" | "cancelled" | "completed";
 type CourseTermRow = {
   id: string;
   course_id: string;
-
   location_id: string;
   trainer_id: string | null;
-
   day_of_week: number;
-
   start_time: string;
   end_time: string;
-
   start_date: string;
   end_date: string;
-
   capacity: number;
-
   status: CourseStatus;
 
-  locations: {
-    name: string;
-    address: string | null;
-  } | null;
+  locations:
+    | {
+        name: string;
+        address: string | null;
+      }[]
+    | null;
 
-  trainers: {
-    first_name: string;
-    last_name: string;
-  } | null;
+  trainers:
+    | {
+        first_name: string;
+        last_name: string;
+      }[]
+    | null;
 
   registrations:
     | {
@@ -123,6 +121,8 @@ function mapCourseTerm(term: CourseTermRow): CourseTerm {
 
   const availableSpots = Math.max(term.capacity - activeRegistrations, 0);
 
+  const trainer = term.trainers?.[0];
+
   return {
     id: term.id,
 
@@ -142,8 +142,8 @@ function mapCourseTerm(term: CourseTermRow): CourseTerm {
 
     trainerId: term.trainer_id ?? undefined,
 
-    trainerName: term.trainers
-      ? `${term.trainers.first_name} ${term.trainers.last_name}`
+    trainerName: trainer
+      ? `${trainer.first_name} ${trainer.last_name}`
       : undefined,
 
     status: availableSpots === 0 ? "full" : term.status,
@@ -336,15 +336,16 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
         capacity,
         status,
 
-        locations (
-          name,
-          address
-        ),
+       
+  locations!course_terms_location_id_fkey (
+    name,
+    address
+  ),
 
-        trainers (
-          first_name,
-          last_name
-        ),
+  trainers!course_terms_trainer_id_fkey (
+    first_name,
+    last_name
+  ),
 
         registrations (
           id,
