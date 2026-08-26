@@ -26,9 +26,6 @@ export const courses: Course[] = [
     lessonDurationMinutes: 45,
     numberOfLessons: 10,
 
-    capacity: 8,
-    availableSpots: 3,
-
     status: "available",
 
     features: ["Malé skupiny", "Skúsený tréner", "Hravá forma výučby"],
@@ -58,9 +55,6 @@ export const courses: Course[] = [
 
     lessonDurationMinutes: 45,
     numberOfLessons: 10,
-
-    capacity: 8,
-    availableSpots: 5,
 
     status: "available",
 
@@ -95,9 +89,6 @@ export const courses: Course[] = [
     lessonDurationMinutes: 60,
     numberOfLessons: 10,
 
-    capacity: 10,
-    availableSpots: 0,
-
     status: "full",
 
     features: [
@@ -129,9 +120,6 @@ export const courses: Course[] = [
     lessonDurationMinutes: 45,
     numberOfLessons: 1,
 
-    capacity: 1,
-    availableSpots: 1,
-
     status: "available",
 
     features: ["Individuálny tréning", "Flexibilný termín", "Osobný prístup"],
@@ -160,9 +148,6 @@ export const courses: Course[] = [
 
     lessonDurationMinutes: 60,
     numberOfLessons: 5,
-
-    capacity: 20,
-    availableSpots: 7,
 
     status: "available",
 
