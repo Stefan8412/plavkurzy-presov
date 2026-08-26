@@ -1,5 +1,6 @@
 import Link from "next/link";
 import MobileMenu from "./MobileMenu";
+import Button from "./ui/Button";
 
 const navigation = [
   { label: "Kurzy", href: "/kurzy" },
@@ -48,12 +49,12 @@ export default function Header() {
             Prihlásiť sa
           </Link>
 
-          <Link
+          <Button
             href="/kurzy"
             className="hidden rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700 sm:block"
           >
             Vybrať kurz
-          </Link>
+          </Button>
 
           <MobileMenu />
         </div>

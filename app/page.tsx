@@ -1,4 +1,6 @@
 import Link from "next/link";
+import SectionHeading from "@/components/ui/SectionHeading";
+import Section from "@/components/ui/Section";
 
 const courses = [
   {
@@ -101,51 +103,41 @@ export default function Home() {
         </section>
 
         {/* Courses */}
-        <section className="py-24">
-          <div className="mx-auto max-w-7xl px-6">
-            <div className="max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-sky-600">
-                Naša ponuka
-              </p>
+        <Section>
+          <SectionHeading
+            eyebrow="Naša ponuka"
+            title="Nájdite správny kurz"
+            description="Kurzy prispôsobené veku a skúsenostiam."
+          />
 
-              <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-950">
-                Nájdite správny kurz
-              </h2>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {courses.map((course) => (
+              <article
+                key={course.title}
+                className="group rounded-3xl border border-slate-200 bg-white p-8 transition hover:-translate-y-1 hover:shadow-xl"
+              >
+                <span className="text-sm font-semibold text-sky-600">
+                  {course.age}
+                </span>
 
-              <p className="mt-4 text-lg text-slate-600">
-                Kurzy prispôsobené veku, skúsenostiam a potrebám každého plavca.
-              </p>
-            </div>
+                <h3 className="mt-3 text-2xl font-bold text-slate-950">
+                  {course.title}
+                </h3>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {courses.map((course) => (
-                <article
-                  key={course.title}
-                  className="group rounded-3xl border border-slate-200 bg-white p-8 transition hover:-translate-y-1 hover:shadow-xl"
+                <p className="mt-4 leading-7 text-slate-600">
+                  {course.description}
+                </p>
+
+                <Link
+                  href="/kurzy"
+                  className="mt-6 inline-block font-semibold text-sky-600"
                 >
-                  <span className="text-sm font-semibold text-sky-600">
-                    {course.age}
-                  </span>
-
-                  <h3 className="mt-3 text-2xl font-bold text-slate-950">
-                    {course.title}
-                  </h3>
-
-                  <p className="mt-4 leading-7 text-slate-600">
-                    {course.description}
-                  </p>
-
-                  <Link
-                    href="/kurzy"
-                    className="mt-6 inline-block font-semibold text-sky-600"
-                  >
-                    Zistiť viac →
-                  </Link>
-                </article>
-              ))}
-            </div>
+                  Zistiť viac →
+                </Link>
+              </article>
+            ))}
           </div>
-        </section>
+        </Section>
 
         {/* Benefits */}
         <section className="bg-slate-950 py-24 text-white">
