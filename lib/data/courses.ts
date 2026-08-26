@@ -194,11 +194,12 @@ function mapCourse(course: CourseRow): Course {
 
     ageMax: course.age_max ?? undefined,
 
-    location: {
-      name: firstLocation?.name ?? "",
-      address: firstLocation?.address ?? undefined,
-    },
-
+  location: {
+  name: course.course_terms?.[0]?.locations?.[0]?.name ?? "Neznáma lokalita",
+  address:
+    course.course_terms?.[0]?.locations?.[0]?.address ??
+    undefined,
+},
     price: course.price,
 
     currency: course.currency,
