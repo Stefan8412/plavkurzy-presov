@@ -42,6 +42,7 @@ export type Course = {
   image?: string;
 
   features: string[];
+  terms: CourseTerm[];
 };
 
 export type CourseTerm = {

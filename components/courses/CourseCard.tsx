@@ -50,6 +50,13 @@ export default function CourseCard({ course }: CourseCardProps) {
               {course.location.name}
             </span>
           </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-slate-500">Termíny</span>
+
+            <span className="font-medium text-slate-900">
+              {course.terms.length}
+            </span>
+          </div>
 
           <div className="flex justify-between gap-4">
             <span className="text-slate-500">Lekcia</span>
