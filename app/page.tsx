@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Header from "@/components/Header";
 
 const courses = [
   {
@@ -56,8 +55,6 @@ const steps = [
 export default function Home() {
   return (
     <>
-      <Header />
-
       <main>
         {/* Hero */}
         <section className="bg-sky-50">
@@ -232,21 +229,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-
-      <footer className="border-t border-slate-200 py-10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
-          <p>© 2026 Plavecká škola Prešov</p>
-
-          <div className="flex gap-6">
-            <Link href="/kontakt" className="hover:text-slate-900">
-              Kontakt
-            </Link>
-            <Link href="/dokumenty" className="hover:text-slate-900">
-              Dokumenty
-            </Link>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }
