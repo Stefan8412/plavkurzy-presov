@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import LoginForm from "./LoginForm";
 
 import { getCourseTermById } from "@/lib/data/courses";
 
@@ -55,6 +57,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   // Načítanie konkrétneho CourseTerm
   const term = await getCourseTermById(termId);
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // UUID neexistuje
   if (!term) {
@@ -152,22 +159,40 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       {/* Zatiaľ iba placeholder pre autentifikáciu */}
       <section className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-8">
-        <h2 className="text-xl font-bold text-slate-950">
-          Prihlásenie alebo registrácia
-        </h2>
+        {!user ? (
+          <>
+            <h2 className="text-xl font-bold text-slate-950">Prihlásenie</h2>
 
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Pre pokračovanie sa budete musieť prihlásiť alebo vytvoriť účet
-          rodiča.
-        </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Prihláste sa do svojho účtu a pokračujte v registrácii na kurz.
+            </p>
 
-        <button
-          type="button"
-          disabled={!isAvailable}
-          className="mt-6 w-full rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
-        >
-          Pokračovať
-        </button>
+            <div className="mt-6">
+              <LoginForm termId={termId} />
+            </div>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+              Ešte nemáte účet?
+            </p>
+
+            <Link
+              href={`/registracia?term=${termId}`}
+              className="mt-2 block text-center text-sm font-semibold text-sky-600 hover:text-sky-700"
+            >
+              Vytvoriť účet
+            </Link>
+          </>
+        ) : (
+          <div>
+            <h2 className="text-xl font-bold text-slate-950">Ste prihlásený</h2>
+
+            <p className="mt-2 text-sm text-slate-600">{user.email}</p>
+
+            <p className="mt-4 text-sm text-slate-600">
+              Môžeme pokračovať výberom dieťaťa.
+            </p>
+          </div>
+        )}
       </section>
     </main>
   );
