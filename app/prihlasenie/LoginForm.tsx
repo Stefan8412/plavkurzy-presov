@@ -30,7 +30,14 @@ export default function LoginForm({ termId }: LoginFormProps) {
     });
 
     if (error) {
-      setError("Nesprávny e-mail alebo heslo.");
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        setError(
+          "E-mail ešte nebol potvrdený. Skontrolujte svoju e-mailovú schránku a potvrďte účet.",
+        );
+      } else {
+        setError("Nesprávny e-mail alebo heslo.");
+      }
+
       setLoading(false);
       return;
     }
