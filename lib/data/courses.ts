@@ -51,6 +51,12 @@ type CourseTermRow = {
       }[]
     | null;
 };
+type CourseTermDetail = CourseTerm & {
+  courseTitle: string;
+  coursePrice: number;
+  courseCurrency: "EUR";
+  courseNumberOfLessons: number;
+};
 
 type CourseRow = {
   id: string;
@@ -372,7 +378,7 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
 }
 export async function getCourseTermById(
   termId: string,
-): Promise<CourseTerm | null> {
+): Promise<CourseTermDetail | null> {
   const uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -397,17 +403,27 @@ export async function getCourseTermById(
       end_date,
       capacity,
       status,
+
       locations (
         name,
         address
       ),
+
       trainers (
         first_name,
         last_name
       ),
+
       registrations (
         id,
         status
+      ),
+
+      courses (
+        title,
+        price,
+        currency,
+        number_of_lessons
       )
     `,
     )
@@ -416,6 +432,7 @@ export async function getCourseTermById(
 
   if (error) {
     console.error("Failed to fetch course term:", error);
+
     throw new Error("Failed to fetch course term");
   }
 
@@ -423,5 +440,22 @@ export async function getCourseTermById(
     return null;
   }
 
-  return mapCourseTerm(data as unknown as CourseTermRow);
+  const course = Array.isArray(data.courses) ? data.courses[0] : data.courses;
+
+  if (!course) {
+    console.error("Course not found for term:", termId);
+
+    throw new Error("Course not found for course term");
+  }
+
+  const mappedTerm = mapCourseTerm(data as unknown as CourseTermRow);
+
+  return {
+    ...mappedTerm,
+
+    courseTitle: course.title,
+    coursePrice: course.price,
+    courseCurrency: course.currency,
+    courseNumberOfLessons: course.number_of_lessons,
+  };
 }

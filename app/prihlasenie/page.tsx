@@ -297,42 +297,50 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         {/* Termín */}
         <section className="mt-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Vybraný termín</p>
+          <p className="text-sm font-medium text-slate-500">Kurz</p>
 
           <h2 className="mt-2 text-xl font-bold text-slate-950">
-            {dayLabels[term.dayOfWeek]}
+            {term.courseTitle}
           </h2>
 
-          <p className="mt-1 text-lg font-semibold text-sky-600">
-            {term.startTime} – {term.endTime}
-          </p>
-
-          <p className="mt-2 text-sm text-slate-500">
-            {term.startDate} – {term.endDate}
-          </p>
-
-          {term.trainerName && (
-            <p className="mt-3 text-sm text-slate-600">
-              Tréner:{" "}
-              <span className="font-medium text-slate-900">
-                {term.trainerName}
-              </span>
-            </p>
-          )}
-
           <div className="mt-5 border-t border-slate-100 pt-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">Voľné miesta</span>
+            <p className="text-sm font-medium text-slate-500">Vybraný termín</p>
 
-              <span
-                className={`text-sm font-semibold ${
-                  isAvailable ? "text-emerald-600" : "text-slate-500"
-                }`}
-              >
-                {isAvailable
-                  ? `${term.availableSpots} / ${term.capacity}`
-                  : "Obsadené"}
-              </span>
+            <h2 className="mt-2 text-xl font-bold text-slate-950">
+              {dayLabels[term.dayOfWeek]}
+            </h2>
+
+            <p className="mt-1 text-lg font-semibold text-sky-600">
+              {term.startTime} – {term.endTime}
+            </p>
+
+            <p className="mt-2 text-sm text-slate-500">
+              {term.startDate} – {term.endDate}
+            </p>
+
+            {term.trainerName && (
+              <p className="mt-3 text-sm text-slate-600">
+                Tréner:{" "}
+                <span className="font-medium text-slate-900">
+                  {term.trainerName}
+                </span>
+              </p>
+            )}
+
+            <div className="mt-5 border-t border-slate-100 pt-5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-500">Voľné miesta</span>
+
+                <span
+                  className={`text-sm font-semibold ${
+                    isAvailable ? "text-emerald-600" : "text-slate-500"
+                  }`}
+                >
+                  {isAvailable
+                    ? `${term.availableSpots} / ${term.capacity}`
+                    : "Obsadené"}
+                </span>
+              </div>
             </div>
           </div>
         </section>
@@ -344,7 +352,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <p className="text-sm text-slate-500">Cena kurzu</p>
 
               <p className="mt-1 text-2xl font-bold text-slate-950">
-                {/* Cena zatiaľ príde z Course */}—
+                {term.coursePrice} {term.courseCurrency}
               </p>
             </div>
 
