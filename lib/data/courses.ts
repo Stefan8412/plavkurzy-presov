@@ -194,12 +194,11 @@ function mapCourse(course: CourseRow): Course {
 
     ageMax: course.age_max ?? undefined,
 
-  location: {
-  name: course.course_terms?.[0]?.locations?.[0]?.name ?? "Neznáma lokalita",
-  address:
-    course.course_terms?.[0]?.locations?.[0]?.address ??
-    undefined,
-},
+    location: {
+      name:
+        course.course_terms?.[0]?.locations?.[0]?.name ?? "Neznáma lokalita",
+      address: course.course_terms?.[0]?.locations?.[0]?.address ?? undefined,
+    },
     price: course.price,
 
     currency: course.currency,
@@ -370,4 +369,59 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
   }
 
   return mapCourse(data as CourseRow);
+}
+export async function getCourseTermById(
+  termId: string,
+): Promise<CourseTerm | null> {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (!uuidRegex.test(termId)) {
+    return null;
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("course_terms")
+    .select(
+      `
+      id,
+      course_id,
+      location_id,
+      trainer_id,
+      day_of_week,
+      start_time,
+      end_time,
+      start_date,
+      end_date,
+      capacity,
+      status,
+      locations (
+        name,
+        address
+      ),
+      trainers (
+        first_name,
+        last_name
+      ),
+      registrations (
+        id,
+        status
+      )
+    `,
+    )
+    .eq("id", termId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to fetch course term:", error);
+    throw new Error("Failed to fetch course term");
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return mapCourseTerm(data as unknown as CourseTermRow);
 }
