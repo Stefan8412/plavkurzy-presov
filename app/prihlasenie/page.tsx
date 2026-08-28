@@ -2,10 +2,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LoginForm from "./LoginForm";
 import AddChildForm from "./AddChildForm";
-
 import { getCourseTermById } from "@/lib/data/courses";
-
 import { getChildren } from "@/lib/data/children";
+import { registerChildForCourse } from "./actions";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -358,12 +357,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
             <div>
               {isAvailable ? (
-                <button
-                  type="button"
-                  className="rounded-full bg-sky-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
-                >
-                  Pokračovať
-                </button>
+                <form action={registerChildForCourse}>
+                  <input type="hidden" name="childId" value={childId} />
+
+                  <input type="hidden" name="courseTermId" value={termId} />
+
+                  <button
+                    type="submit"
+                    className="w-full rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
+                  >
+                    Potvrdiť prihlášku
+                  </button>
+                </form>
               ) : (
                 <span className="rounded-full bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-500">
                   Termín je obsadený
