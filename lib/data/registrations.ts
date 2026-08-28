@@ -15,36 +15,55 @@ export type Registration = {
   registeredAt: string;
 };
 
+type RegistrationRow = {
+  id: string;
+  child_id: string;
+  course_term_id: string;
+  status: string;
+  note: string | null;
+  registered_at: string;
+};
+
+type CreateRegistrationInput = {
+  childId: string;
+  courseTermId: string;
+};
+
 /**
- * Vytvorí novú registráciu dieťaťa na konkrétny termín.
- *
- * Bezpečnostné kontroly:
- * - používateľ musí byť prihlásený
- * - dieťa musí patriť prihlásenému rodičovi
- * - termín musí existovať
- * - rovnaké dieťa nemôže byť 2x registrované na rovnaký termín
+ * Vytvorí registráciu dieťaťa na konkrétny termín.
  */
 export async function createRegistration({
   childId,
   courseTermId,
-  note,
-}: {
-  childId: string;
-  courseTermId: string;
-  note?: string;
-}): Promise<Registration> {
+}: CreateRegistrationInput): Promise<
+  | {
+      success: true;
+      registrationId: string;
+    }
+  | {
+      success: false;
+      error: string;
+    }
+> {
   const supabase = await createClient();
 
-  // 1. Overenie prihláseného používateľa
+  /**
+   * 1. Overenie prihláseného používateľa
+   */
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Musíte byť prihlásený.");
+    return {
+      success: false,
+      error: "Musíte byť prihlásený.",
+    };
   }
 
-  // 2. Overenie, že dieťa patrí aktuálnemu používateľovi
+  /**
+   * 2. Overenie, že dieťa patrí prihlásenému rodičovi
+   */
   const { data: child, error: childError } = await supabase
     .from("children")
     .select("id")
@@ -54,72 +73,233 @@ export async function createRegistration({
 
   if (childError) {
     console.error("Failed to fetch child:", childError);
-    throw new Error("Nepodarilo sa overiť dieťa.");
+
+    return {
+      success: false,
+      error: "Dieťa sa nepodarilo načítať.",
+    };
   }
 
   if (!child) {
-    throw new Error("Dieťa neexistuje alebo vám nepatrí.");
+    return {
+      success: false,
+      error: "Toto dieťa vám nepatrí.",
+    };
   }
 
-  // 3. Overenie existencie termínu
-  const { data: term, error: termError } = await supabase
+  /**
+   * 3. Overenie termínu
+   */
+  const { data: courseTerm, error: termError } = await supabase
     .from("course_terms")
-    .select("id, status")
+    .select("id, capacity, status")
     .eq("id", courseTermId)
     .maybeSingle();
 
   if (termError) {
     console.error("Failed to fetch course term:", termError);
-    throw new Error("Nepodarilo sa overiť termín.");
+
+    return {
+      success: false,
+      error: "Termín sa nepodarilo načítať.",
+    };
   }
 
-  if (!term) {
-    throw new Error("Vybraný termín neexistuje.");
+  if (!courseTerm) {
+    return {
+      success: false,
+      error: "Tento termín neexistuje.",
+    };
   }
 
-  if (term.status !== "available") {
-    throw new Error("Tento termín momentálne nie je dostupný.");
+  if (courseTerm.status !== "available") {
+    return {
+      success: false,
+      error: "Tento termín už nie je dostupný.",
+    };
   }
 
-  // 4. Vytvorenie registrácie
+  /**
+   * 4. Kontrola existujúcej registrácie
+   */
+  const { data: existingRegistration, error: existingError } = await supabase
+    .from("registrations")
+    .select("id, status")
+    .eq("child_id", childId)
+    .eq("course_term_id", courseTermId)
+    .maybeSingle();
+
+  if (existingError) {
+    console.error("Failed to check existing registration:", existingError);
+
+    return {
+      success: false,
+      error: "Nepodarilo sa overiť existujúcu registráciu.",
+    };
+  }
+
+  /**
+   * 5. Existujúca aktívna registrácia
+   */
+  if (existingRegistration && existingRegistration.status !== "cancelled") {
+    return {
+      success: false,
+      error: "Toto dieťa je už na tento termín prihlásené.",
+    };
+  }
+
+  /**
+   * 6. Ak bola stará registrácia zrušená,
+   *    vytvoríme novú registráciu.
+   */
+  if (existingRegistration && existingRegistration.status === "cancelled") {
+    const { data, error } = await supabase
+      .from("registrations")
+      .update({
+        status: "pending",
+        note: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existingRegistration.id)
+      .select("id, child_id, course_term_id, status, note, registered_at")
+      .single();
+
+    if (error) {
+      console.error("Failed to reactivate registration:", error);
+
+      return {
+        success: false,
+        error: "Registráciu sa nepodarilo vytvoriť.",
+      };
+    }
+
+    if (!data) {
+      return {
+        success: false,
+        error: "Registráciu sa nepodarilo vytvoriť.",
+      };
+    }
+
+    return {
+      success: true,
+      registrationId: data.id,
+    };
+  }
+
+  /**
+   * 7. Kontrola kapacity
+   */
+  const { count: activeRegistrations, error: countError } = await supabase
+    .from("registrations")
+    .select("id", {
+      count: "exact",
+      head: true,
+    })
+    .eq("course_term_id", courseTermId)
+    .in("status", ["pending", "confirmed"]);
+
+  if (countError) {
+    console.error("Failed to count registrations:", countError);
+
+    return {
+      success: false,
+      error: "Nepodarilo sa overiť voľné miesto.",
+    };
+  }
+
+  const registeredCount = activeRegistrations ?? 0;
+
+  if (registeredCount >= courseTerm.capacity) {
+    return {
+      success: false,
+      error: "Tento termín je už obsadený.",
+    };
+  }
+
+  /**
+   * 8. Vytvorenie novej registrácie
+   */
   const { data, error } = await supabase
     .from("registrations")
     .insert({
       child_id: childId,
       course_term_id: courseTermId,
       status: "pending",
-      note: note?.trim() || null,
     })
-    .select(
-      `
-      id,
-      child_id,
-      course_term_id,
-      status,
-      note,
-      registered_at,
-      updated_at
-    `,
-    )
+    .select("id, child_id, course_term_id, status, note, registered_at")
     .single();
 
   if (error) {
-    // PostgreSQL unique constraint:
-    // (child_id, course_term_id)
+    console.error("Failed to create registration:", error);
+
+    /**
+     * PostgreSQL unique constraint:
+     * unique (child_id, course_term_id)
+     */
     if (error.code === "23505") {
-      throw new Error("Toto dieťa je už na tento termín prihlásené.");
+      return {
+        success: false,
+        error: "Toto dieťa je už na tento termín prihlásené.",
+      };
     }
 
-    console.error("Failed to create registration:", error);
-    throw new Error("Registráciu sa nepodarilo vytvoriť.");
+    return {
+      success: false,
+      error: "Registráciu sa nepodarilo vytvoriť.",
+    };
+  }
+
+  if (!data) {
+    return {
+      success: false,
+      error: "Registráciu sa nepodarilo vytvoriť.",
+    };
   }
 
   return {
-    id: data.id,
-    childId: data.child_id,
-    courseTermId: data.course_term_id,
-    status: data.status as RegistrationStatus,
-    note: data.note,
-    registeredAt: data.registered_at,
+    success: true,
+    registrationId: data.id,
+  };
+}
+
+/**
+ * Nájde registráciu konkrétneho dieťaťa
+ * na konkrétny termín.
+ */
+export async function getRegistrationForChildAndTerm({
+  childId,
+  courseTermId,
+}: {
+  childId: string;
+  courseTermId: string;
+}): Promise<Registration | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("registrations")
+    .select("id, child_id, course_term_id, status, note, registered_at")
+    .eq("child_id", childId)
+    .eq("course_term_id", courseTermId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to fetch registration:", error);
+
+    throw new Error("Registráciu sa nepodarilo načítať.");
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const row = data as RegistrationRow;
+
+  return {
+    id: row.id,
+    childId: row.child_id,
+    courseTermId: row.course_term_id,
+    status: row.status as RegistrationStatus,
+    note: row.note,
+    registeredAt: row.registered_at,
   };
 }

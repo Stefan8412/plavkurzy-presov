@@ -4,7 +4,8 @@ import LoginForm from "./LoginForm";
 import AddChildForm from "./AddChildForm";
 import { getCourseTermById } from "@/lib/data/courses";
 import { getChildren } from "@/lib/data/children";
-import { registerChildForCourse } from "./actions";
+
+import RegistrationForm from "./RegistrationForm";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -356,19 +357,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
 
             <div>
-              {isAvailable ? (
-                <form action={registerChildForCourse}>
-                  <input type="hidden" name="childId" value={childId} />
-
-                  <input type="hidden" name="courseTermId" value={termId} />
-
-                  <button
-                    type="submit"
-                    className="w-full rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
-                  >
-                    Potvrdiť prihlášku
-                  </button>
-                </form>
+              {isAvailable && childId ? (
+                <RegistrationForm childId={childId} courseTermId={termId} />
+              ) : isAvailable ? (
+                <span className="text-sm text-slate-500">
+                  Najprv vyberte dieťa.
+                </span>
               ) : (
                 <span className="rounded-full bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-500">
                   Termín je obsadený
