@@ -2,26 +2,55 @@
 
 import { createRegistration } from "@/lib/data/registrations";
 
+export type RegistrationActionState = {
+  success: boolean;
+  message: string;
+};
+
 export async function registerChildForCourse(
+  _prevState: RegistrationActionState,
   formData: FormData,
-): Promise<void> {
+): Promise<RegistrationActionState> {
   const childId = formData.get("childId");
   const courseTermId = formData.get("courseTermId");
 
   if (typeof childId !== "string" || !childId) {
-    throw new Error("Chýba ID dieťaťa.");
+    return {
+      success: false,
+      message: "Chýba ID dieťaťa.",
+    };
   }
 
   if (typeof courseTermId !== "string" || !courseTermId) {
-    throw new Error("Chýba ID termínu.");
+    return {
+      success: false,
+      message: "Chýba ID termínu.",
+    };
   }
 
-  const result = await createRegistration({
-    childId,
-    courseTermId,
-  });
+  try {
+    const result = await createRegistration({
+      childId,
+      courseTermId,
+    });
 
-  if (!result.success) {
-    throw new Error(result.error);
+    if (!result.success) {
+      return {
+        success: false,
+        message: result.error,
+      };
+    }
+
+    return {
+      success: true,
+      message: "Prihláška bola úspešne odoslaná.",
+    };
+  } catch (error) {
+    console.error("Registration action failed:", error);
+
+    return {
+      success: false,
+      message: "Prihlášku sa nepodarilo odoslať.",
+    };
   }
 }
