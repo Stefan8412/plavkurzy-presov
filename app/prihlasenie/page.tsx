@@ -4,7 +4,7 @@ import LoginForm from "./LoginForm";
 import AddChildForm from "./AddChildForm";
 import { getCourseTermById } from "@/lib/data/courses";
 import { getChildren } from "@/lib/data/children";
-
+import { getRegistrationForChildAndTerm } from "@/lib/data/registrations";
 import RegistrationForm from "./RegistrationForm";
 
 type LoginPageProps = {
@@ -219,6 +219,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     ? children.find((child) => child.id === childId)
     : undefined;
 
+  const existingRegistration =
+    selectedChild && childId
+      ? await getRegistrationForChildAndTerm({
+          childId,
+          courseTermId: termId,
+        })
+      : null;
+
   // --------------------------------------------------
   // Vybrané dieťa
   // --------------------------------------------------
@@ -357,7 +365,26 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
 
             <div>
-              {isAvailable && childId ? (
+              {existingRegistration ? (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+                  <p className="font-semibold text-emerald-800">
+                    Dieťa je už prihlásené
+                  </p>
+
+                  <p className="mt-1 text-sm text-emerald-700">
+                    Stav:{" "}
+                    <span className="font-semibold">
+                      {existingRegistration.status === "pending"
+                        ? "Čaká na potvrdenie"
+                        : existingRegistration.status === "confirmed"
+                          ? "Potvrdená"
+                          : existingRegistration.status === "completed"
+                            ? "Dokončená"
+                            : "Zrušená"}
+                    </span>
+                  </p>
+                </div>
+              ) : isAvailable && childId ? (
                 <RegistrationForm childId={childId} courseTermId={termId} />
               ) : isAvailable ? (
                 <span className="text-sm text-slate-500">
