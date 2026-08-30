@@ -24,13 +24,16 @@ export default function LoginForm({ termId }: LoginFormProps) {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const {
+      data: { user },
+      error: loginError,
+    } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      if (error.message.toLowerCase().includes("email not confirmed")) {
+    if (loginError || !user) {
+      if (loginError?.message.toLowerCase().includes("email not confirmed")) {
         setError(
           "E-mail ešte nebol potvrdený. Skontrolujte svoju e-mailovú schránku a potvrďte účet.",
         );
@@ -42,7 +45,26 @@ export default function LoginForm({ termId }: LoginFormProps) {
       return;
     }
 
-    const redirectUrl = termId ? `/prihlasenie?term=${termId}` : "/prihlasenie";
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError) {
+      console.error("Failed to load profile:", profileError);
+      setError("Nepodarilo sa načítať používateľský účet.");
+      setLoading(false);
+      return;
+    }
+
+    if (profile?.role === "admin") {
+      router.push("/admin");
+      router.refresh();
+      return;
+    }
+
+    const redirectUrl = termId ? `/prihlasenie?term=${termId}` : "/kurzy";
 
     router.push(redirectUrl);
     router.refresh();

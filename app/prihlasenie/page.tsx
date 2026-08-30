@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import LoginForm from "./LoginForm";
 import AddChildForm from "./AddChildForm";
@@ -31,40 +32,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const childId = params.child;
 
   // --------------------------------------------------
-  // Žiadny termín
-  // --------------------------------------------------
-
-  if (!termId) {
-    return (
-      <main className="mx-auto max-w-3xl px-6 py-16 lg:px-8">
-        <Link
-          href="/kurzy"
-          className="text-sm font-medium text-sky-600 hover:text-sky-700"
-        >
-          ← Späť na kurzy
-        </Link>
-
-        <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-2xl font-bold text-slate-950">
-            Vyberte si termín kurzu
-          </h1>
-
-          <p className="mt-3 text-slate-600">
-            Pred prihlásením je potrebné vybrať konkrétny termín kurzu.
-          </p>
-
-          <Link
-            href="/kurzy"
-            className="mt-6 inline-flex rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
-          >
-            Zobraziť kurzy
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
-  // --------------------------------------------------
   // Supabase + používateľ
   // --------------------------------------------------
 
@@ -73,6 +40,69 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // --------------------------------------------------
+  // Prihlásenie bez vybraného termínu
+  // --------------------------------------------------
+
+  if (!termId) {
+    // Ak je používateľ už prihlásený,
+    // zistíme jeho rolu.
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.role === "admin") {
+        redirect("/admin");
+      }
+
+      // Prihlásený rodič bez konkrétneho termínu
+      // pokračuje na zoznam kurzov.
+      redirect("/kurzy");
+    }
+
+    // Neprihlásený používateľ → klasický login
+    return (
+      <main className="mx-auto max-w-xl px-6 py-16 lg:px-8">
+        <Link
+          href="/"
+          className="text-sm font-medium text-sky-600 hover:text-sky-700"
+        >
+          ← Späť na domov
+        </Link>
+
+        <div className="mt-8">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#009ee9]">
+            FEDDY
+          </p>
+
+          <h1 className="mt-3 text-4xl font-bold tracking-tight text-[#071b55]">
+            Prihlásenie
+          </h1>
+
+          <p className="mt-3 text-slate-600">Prihláste sa do svojho účtu.</p>
+        </div>
+
+        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <LoginForm />
+
+          <div className="mt-8 border-t border-slate-100 pt-6 text-center">
+            <p className="text-sm text-slate-500">Ešte nemáte účet?</p>
+
+            <Link
+              href="/registracia"
+              className="mt-2 inline-block text-sm font-semibold text-[#009ee9] hover:text-[#0087c9]"
+            >
+              Vytvoriť účet
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   // --------------------------------------------------
   // Termín
