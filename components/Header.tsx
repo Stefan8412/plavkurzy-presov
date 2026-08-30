@@ -5,9 +5,9 @@ import Button from "./ui/Button";
 
 const navigation = [
   { label: "Kurzy", href: "/kurzy" },
-  { label: "Rozvrh", href: "/rozvrh" },
+  { label: "Pre škôlky a školy", href: "/skolky-skoly" },
   { label: "O nás", href: "/o-nas" },
-  { label: "Tréneri", href: "/treneri" },
+  /*   { label: "Tréneri", href: "/treneri" }, */
   { label: "Cenník", href: "/cennik" },
   { label: "Kontakt", href: "/kontakt" },
 ];
