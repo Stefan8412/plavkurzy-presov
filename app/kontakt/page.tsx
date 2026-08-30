@@ -121,8 +121,8 @@ export default function ContactPage() {
             </h2>
 
             <p className="mt-3 text-slate-600">
-              Formulár je zatiaľ pripravený vizuálne. Odosielanie môžeme
-              následne napojiť na e-mail.
+              Formulár je zatiaľ pripravený vizuálne. Odosielanie správ zatiaľ
+              nie je aktivované. Kontaktujte nás telefonicky alebo e-mailom.
             </p>
 
             <form className="mt-8 space-y-5">
