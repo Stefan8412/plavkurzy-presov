@@ -88,158 +88,61 @@ export async function createRegistration({
   }
 
   /**
-   * 3. Overenie termínu
+   * 3. Atomická registrácia cez PostgreSQL RPC.
+   *
+   * Kapacitu, existujúcu registráciu aj súbežné
+   * požiadavky rieši databáza v jednej transakcii.
    */
-  const { data: courseTerm, error: termError } = await supabase
-    .from("course_terms")
-    .select("id, capacity, status")
-    .eq("id", courseTermId)
-    .maybeSingle();
-
-  if (termError) {
-    console.error("Failed to fetch course term:", termError);
-
-    return {
-      success: false,
-      error: "Termín sa nepodarilo načítať.",
-    };
-  }
-
-  if (!courseTerm) {
-    return {
-      success: false,
-      error: "Tento termín neexistuje.",
-    };
-  }
-
-  if (courseTerm.status !== "available") {
-    return {
-      success: false,
-      error: "Tento termín už nie je dostupný.",
-    };
-  }
-
-  /**
-   * 4. Kontrola existujúcej registrácie
-   */
-  const { data: existingRegistration, error: existingError } = await supabase
-    .from("registrations")
-    .select("id, status")
-    .eq("child_id", childId)
-    .eq("course_term_id", courseTermId)
-    .maybeSingle();
-
-  if (existingError) {
-    console.error("Failed to check existing registration:", existingError);
-
-    return {
-      success: false,
-      error: "Nepodarilo sa overiť existujúcu registráciu.",
-    };
-  }
-
-  /**
-   * 5. Existujúca aktívna registrácia
-   */
-  if (existingRegistration && existingRegistration.status !== "cancelled") {
-    return {
-      success: false,
-      error: "Toto dieťa je už na tento termín prihlásené.",
-    };
-  }
-
-  /**
-   * 6. Ak bola stará registrácia zrušená,
-   *    vytvoríme novú registráciu.
-   */
-  if (existingRegistration && existingRegistration.status === "cancelled") {
-    const { data, error } = await supabase
-      .from("registrations")
-      .update({
-        status: "pending",
-        note: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", existingRegistration.id)
-      .select("id, child_id, course_term_id, status, note, registered_at")
-      .single();
-
-    if (error) {
-      console.error("Failed to reactivate registration:", error);
-
-      return {
-        success: false,
-        error: "Registráciu sa nepodarilo vytvoriť.",
-      };
-    }
-
-    if (!data) {
-      return {
-        success: false,
-        error: "Registráciu sa nepodarilo vytvoriť.",
-      };
-    }
-
-    return {
-      success: true,
-      registrationId: data.id,
-    };
-  }
-
-  /**
-   * 7. Kontrola kapacity
-   */
-  const { count: activeRegistrations, error: countError } = await supabase
-    .from("registrations")
-    .select("id", {
-      count: "exact",
-      head: true,
-    })
-    .eq("course_term_id", courseTermId)
-    .in("status", ["pending", "confirmed"]);
-
-  if (countError) {
-    console.error("Failed to count registrations:", countError);
-
-    return {
-      success: false,
-      error: "Nepodarilo sa overiť voľné miesto.",
-    };
-  }
-
-  const registeredCount = activeRegistrations ?? 0;
-
-  if (registeredCount >= courseTerm.capacity) {
-    return {
-      success: false,
-      error: "Tento termín je už obsadený.",
-    };
-  }
-
-  /**
-   * 8. Vytvorenie novej registrácie
-   */
-  const { data, error } = await supabase
-    .from("registrations")
-    .insert({
-      child_id: childId,
-      course_term_id: courseTermId,
-      status: "pending",
-    })
-    .select("id, child_id, course_term_id, status, note, registered_at")
-    .single();
+  const { data, error } = await supabase.rpc("register_child_for_term", {
+    p_child_id: childId,
+    p_course_term_id: courseTermId,
+  });
 
   if (error) {
     console.error("Failed to create registration:", error);
 
     /**
-     * PostgreSQL unique constraint:
-     * unique (child_id, course_term_id)
+     * Chyby vytvorené našou PostgreSQL funkciou.
      */
-    if (error.code === "23505") {
+    if (error.message.includes("už na tento termín prihlásené")) {
       return {
         success: false,
         error: "Toto dieťa je už na tento termín prihlásené.",
+      };
+    }
+
+    if (error.message.includes("už nie je dostupný")) {
+      return {
+        success: false,
+        error: "Tento termín už nie je dostupný.",
+      };
+    }
+
+    if (error.message.includes("už obsadený")) {
+      return {
+        success: false,
+        error: "Tento termín je už obsadený.",
+      };
+    }
+
+    if (error.message.includes("Termín neexistuje")) {
+      return {
+        success: false,
+        error: "Tento termín neexistuje.",
+      };
+    }
+
+    if (error.message.includes("Dieťa neexistuje")) {
+      return {
+        success: false,
+        error: "Dieťa neexistuje.",
+      };
+    }
+
+    if (error.message.includes("nemáte prístup")) {
+      return {
+        success: false,
+        error: "K tomuto dieťaťu nemáte prístup.",
       };
     }
 
@@ -249,7 +152,16 @@ export async function createRegistration({
     };
   }
 
-  if (!data) {
+  /**
+   * RPC vracia jeden riadok:
+   * {
+   *   registration_id,
+   *   registration_status
+   * }
+   */
+  const registration = Array.isArray(data) ? data[0] : data;
+
+  if (!registration?.registration_id) {
     return {
       success: false,
       error: "Registráciu sa nepodarilo vytvoriť.",
@@ -258,7 +170,7 @@ export async function createRegistration({
 
   return {
     success: true,
-    registrationId: data.id,
+    registrationId: registration.registration_id,
   };
 }
 

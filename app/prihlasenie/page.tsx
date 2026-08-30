@@ -366,23 +366,32 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
             <div>
               {existingRegistration ? (
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
-                  <p className="font-semibold text-emerald-800">
-                    Dieťa je už prihlásené
-                  </p>
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+                    <p className="font-semibold text-emerald-800">
+                      Dieťa je už prihlásené
+                    </p>
 
-                  <p className="mt-1 text-sm text-emerald-700">
-                    Stav:{" "}
-                    <span className="font-semibold">
-                      {existingRegistration.status === "pending"
-                        ? "Čaká na potvrdenie"
-                        : existingRegistration.status === "confirmed"
-                          ? "Potvrdená"
-                          : existingRegistration.status === "completed"
-                            ? "Dokončená"
-                            : "Zrušená"}
-                    </span>
-                  </p>
+                    <p className="mt-1 text-sm text-emerald-700">
+                      Stav:{" "}
+                      <span className="font-semibold">
+                        {existingRegistration.status === "pending"
+                          ? "Čaká na potvrdenie"
+                          : existingRegistration.status === "confirmed"
+                            ? "Potvrdená"
+                            : existingRegistration.status === "completed"
+                              ? "Dokončená"
+                              : "Zrušená"}
+                      </span>
+                    </p>
+                  </div>
+
+                  <Link
+                    href={`/prihlasenie?term=${termId}`}
+                    className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                  >
+                    Vybrať iné dieťa
+                  </Link>
                 </div>
               ) : isAvailable && childId ? (
                 <RegistrationForm childId={childId} courseTermId={termId} />
@@ -466,34 +475,53 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           </div>
         ) : (
-          <div className="mt-6 space-y-3">
-            {children.map((child) => (
-              <div
-                key={child.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5"
-              >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h3 className="font-semibold text-slate-950">
-                      {child.firstName} {child.lastName}
-                    </h3>
+          <>
+            <div className="mt-6 space-y-3">
+              {children.map((child) => (
+                <div
+                  key={child.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-5"
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h3 className="font-semibold text-slate-950">
+                        {child.firstName} {child.lastName}
+                      </h3>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      Narodenie:{" "}
-                      {new Date(child.dateOfBirth).toLocaleDateString("sk-SK")}
-                    </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Narodenie:{" "}
+                        {new Date(child.dateOfBirth).toLocaleDateString(
+                          "sk-SK",
+                        )}
+                      </p>
+                    </div>
+
+                    <Link
+                      href={`/prihlasenie?term=${termId}&child=${child.id}`}
+                      className="inline-flex items-center justify-center rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
+                    >
+                      Vybrať dieťa
+                    </Link>
                   </div>
-
-                  <Link
-                    href={`/prihlasenie?term=${termId}&child=${child.id}`}
-                    className="inline-flex items-center justify-center rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
-                  >
-                    Vybrať dieťa
-                  </Link>
                 </div>
+              ))}
+            </div>
+
+            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
+              <h3 className="font-semibold text-slate-950">
+                Pridať ďalšie dieťa
+              </h3>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Ak chcete prihlásiť ďalšie dieťa, môžete ho pridať do svojho
+                účtu.
+              </p>
+
+              <div className="mt-6">
+                <AddChildForm />
               </div>
-            ))}
-          </div>
+            </div>
+          </>
         )}
       </section>
     </main>
