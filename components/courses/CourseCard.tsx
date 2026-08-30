@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Course } from "@/types/course";
+import Image from "next/image";
 
 type CourseCardProps = {
   course: Course;
@@ -14,10 +15,14 @@ const levelLabels = {
 export default function CourseCard({ course }: CourseCardProps) {
   return (
     <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-lg">
-      <div className="aspect-[16/10] bg-sky-100">
-        <div className="flex h-full items-center justify-center text-sm font-medium text-sky-700">
-          FOTO
-        </div>
+      <div className="flex aspect-[16/10] items-center justify-center bg-sky-50 p-8">
+        <Image
+          src="/images/logo-feddy1.png"
+          alt="FEDDY Plavecká škola"
+          width={320}
+          height={220}
+          className="h-full w-full object-contain"
+        />
       </div>
 
       <div className="p-6">
