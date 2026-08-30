@@ -7,6 +7,7 @@ import { getCourseTermById } from "@/lib/data/courses";
 import { getChildren } from "@/lib/data/children";
 import { getRegistrationForChildAndTerm } from "@/lib/data/registrations";
 import RegistrationForm from "./RegistrationForm";
+import { cancelOwnRegistration } from "./actions";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -385,7 +386,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         {/* Ďalší krok */}
         <section className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-6">
-          <div className="flex items-center justify-between gap-6">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-slate-500">Cena kurzu</p>
 
@@ -394,12 +395,41 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </p>
             </div>
 
-            <div>
-              {existingRegistration ? (
+            <div className="w-full sm:w-auto">
+              {existingRegistration?.status === "cancelled" ? (
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+                    <p className="font-semibold text-red-800">
+                      Registrácia bola zrušená
+                    </p>
+
+                    <p className="mt-1 text-sm text-red-700">
+                      Dieťa môžete na tento termín znovu prihlásiť.
+                    </p>
+                  </div>
+
+                  {isAvailable && childId ? (
+                    <RegistrationForm childId={childId} courseTermId={termId} />
+                  ) : (
+                    <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-500">
+                      Termín je obsadený
+                    </span>
+                  )}
+
+                  <Link
+                    href={`/prihlasenie?term=${termId}`}
+                    className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                  >
+                    Vybrať iné dieťa
+                  </Link>
+                </div>
+              ) : existingRegistration ? (
                 <div className="space-y-4">
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
                     <p className="font-semibold text-emerald-800">
-                      Dieťa je už prihlásené
+                      {existingRegistration.status === "completed"
+                        ? "Kurz bol dokončený"
+                        : "Dieťa je už prihlásené"}
                     </p>
 
                     <p className="mt-1 text-sm text-emerald-700">
@@ -422,6 +452,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   >
                     Vybrať iné dieťa
                   </Link>
+
+                  {(existingRegistration.status === "pending" ||
+                    existingRegistration.status === "confirmed") && (
+                    <form
+                      action={cancelOwnRegistration.bind(
+                        null,
+                        existingRegistration.id,
+                      )}
+                    >
+                      <button
+                        type="submit"
+                        className="inline-flex w-full items-center justify-center rounded-full border border-red-200 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100"
+                      >
+                        Zrušiť prihlášku
+                      </button>
+                    </form>
+                  )}
                 </div>
               ) : isAvailable && childId ? (
                 <RegistrationForm childId={childId} courseTermId={termId} />
