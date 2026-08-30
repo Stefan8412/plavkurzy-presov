@@ -21,6 +21,18 @@ export default async function Header() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let isAdmin = false;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    isAdmin = profile?.role === "admin";
+  }
+
   return (
     <header className="relative z-50 border-b border-sky-100 bg-white">
       <div className="mx-auto flex min-h-24 max-w-7xl items-center justify-between gap-6 px-6 py-3">
@@ -49,6 +61,14 @@ export default async function Header() {
               {item.label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="text-sm font-semibold text-[#071b55] transition-colors hover:text-[#009ee9]"
+            >
+              Administrácia
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
