@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 type AddChildFormProps = {
   onSuccess?: () => void;
@@ -9,7 +10,7 @@ type AddChildFormProps = {
 
 export default function AddChildForm({ onSuccess }: AddChildFormProps) {
   const supabase = createClient();
-
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
@@ -60,6 +61,7 @@ export default function AddChildForm({ onSuccess }: AddChildFormProps) {
     setLoading(false);
 
     onSuccess?.();
+    router.refresh();
   }
 
   return (
