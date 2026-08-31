@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ContactForm from "./ContactForm";
 
 const locations = [
   {
@@ -121,117 +122,12 @@ export default function ContactPage() {
             </h2>
 
             <p className="mt-3 text-slate-600">
-              Formulár je zatiaľ pripravený vizuálne. Odosielanie správ zatiaľ
-              nie je aktivované. Kontaktujte nás telefonicky alebo e-mailom.
+              Napíšte nám správu a ozveme sa vám čo najskôr. Formular bude
+              posielat emaily na plavaniepo@gmail.com az po overeni domeny,
+              zatial emaily odosiela na stefan@hancar.sk.
             </p>
 
-            <form className="mt-8 space-y-5">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-semibold text-slate-700"
-                >
-                  Meno a priezvisko
-                </label>
-
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#009ee9] focus:ring-2 focus:ring-sky-100"
-                  placeholder="Ján Novák"
-                />
-              </div>
-
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-semibold text-slate-700"
-                  >
-                    E-mail
-                  </label>
-
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#009ee9] focus:ring-2 focus:ring-sky-100"
-                    placeholder="vas@email.sk"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-semibold text-slate-700"
-                  >
-                    Telefón
-                  </label>
-
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#009ee9] focus:ring-2 focus:ring-sky-100"
-                    placeholder="+421 ..."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="subject"
-                  className="block text-sm font-semibold text-slate-700"
-                >
-                  Mám záujem o
-                </label>
-
-                <select
-                  id="subject"
-                  name="subject"
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#009ee9] focus:ring-2 focus:ring-sky-100"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Vyberte možnosť
-                  </option>
-                  <option value="children">Skupinový kurz pre deti</option>
-                  <option value="individual">Individuálne plávanie</option>
-                  <option value="schools">Plávanie pre MŠ / ZŠ</option>
-                  <option value="camp">Plavecký tábor</option>
-                  <option value="other">Iné</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-semibold text-slate-700"
-                >
-                  Správa
-                </label>
-
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={6}
-                  className="mt-2 w-full resize-none rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#009ee9] focus:ring-2 focus:ring-sky-100"
-                  placeholder="Napíšte nám, s čím vám môžeme pomôcť..."
-                />
-              </div>
-
-              <button
-                type="button"
-                className="w-full rounded-full bg-[#009ee9] px-6 py-4 font-bold text-white transition hover:bg-[#0087c9]"
-              >
-                Odoslať správu
-              </button>
-
-              <p className="text-center text-xs leading-5 text-slate-400">
-                Odosielanie formulára zatiaľ nie je aktivované.
-              </p>
-            </form>
+            <ContactForm />
           </div>
         </div>
       </section>
