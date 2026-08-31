@@ -90,7 +90,7 @@ export default async function Header() {
             Vybrať kurz
           </Button>
 
-          <MobileMenu />
+          <MobileMenu isAdmin={isAdmin} />
         </div>
       </div>
     </header>

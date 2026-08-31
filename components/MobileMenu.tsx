@@ -3,16 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 
+type MobileMenuProps = {
+  isAdmin?: boolean;
+};
+
 const navigation = [
   { label: "Kurzy", href: "/kurzy" },
   { label: "Pre škôlky a školy", href: "/skolky-skoly" },
   { label: "O nás", href: "/o-nas" },
-  /*   { label: "Tréneri", href: "/treneri" }, */
+  /* { label: "Tréneri", href: "/treneri" }, */
   { label: "Cenník", href: "/cennik" },
   { label: "Kontakt", href: "/kontakt" },
 ];
 
-export default function MobileMenu() {
+export default function MobileMenu({ isAdmin = false }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -55,11 +59,21 @@ export default function MobileMenu() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="border-b border-slate-100 py-4 text-base font-medium text-slate-800 last:border-0"
+                className="border-b border-slate-100 py-4 text-base font-medium text-slate-800"
               >
                 {item.label}
               </Link>
             ))}
+
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setIsOpen(false)}
+                className="border-b border-slate-100 py-4 text-base font-semibold text-[#009ee9]"
+              >
+                Administrácia
+              </Link>
+            )}
 
             <Link
               href="/kurzy"
