@@ -16,10 +16,8 @@ export type DayOfWeek =
 export type Course = {
   id: string;
   slug: string;
-
   title: string;
   description: string;
-
   category: CourseCategory;
   level: CourseLevel;
 
@@ -32,6 +30,8 @@ export type Course = {
   };
 
   price: number;
+  priceTwiceWeekly?: number;
+
   currency: "EUR";
 
   lessonDurationMinutes: number;
@@ -40,8 +40,8 @@ export type Course = {
   status: CourseStatus;
 
   image?: string;
-
   features: string[];
+
   terms: CourseTerm[];
 };
 

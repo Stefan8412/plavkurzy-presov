@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { Course } from "@/types/course";
 import Image from "next/image";
+import type { Course } from "@/types/course";
 
 type CourseCardProps = {
   course: Course;
@@ -55,9 +55,9 @@ export default function CourseCard({ course }: CourseCardProps) {
               {course.location.name}
             </span>
           </div>
+
           <div className="flex justify-between gap-4">
             <span className="text-slate-500">Termíny</span>
-
             <span className="font-medium text-slate-900">
               {course.terms.length}
             </span>
@@ -77,11 +77,24 @@ export default function CourseCard({ course }: CourseCardProps) {
             </span>
           </div>
 
-          <div className="flex justify-between gap-4">
-            <span className="text-slate-500">Cena</span>
-            <span className="font-semibold text-slate-950">
-              {course.price} €
-            </span>
+          <div className="border-t border-slate-100 pt-3">
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-slate-500">1× týždenne</span>
+
+              <span className="font-semibold text-slate-950">
+                {course.price} €
+              </span>
+            </div>
+
+            {course.priceTwiceWeekly !== undefined && (
+              <div className="mt-2 flex items-center justify-between gap-4">
+                <span className="text-slate-500">2× týždenne</span>
+
+                <span className="font-semibold text-slate-950">
+                  {course.priceTwiceWeekly} €
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

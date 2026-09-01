@@ -22,11 +22,15 @@ type CourseTermRow = {
   course_id: string;
   location_id: string;
   trainer_id: string | null;
+
   day_of_week: number;
+
   start_time: string;
   end_time: string;
+
   start_date: string;
   end_date: string;
+
   capacity: number;
   status: CourseStatus;
 
@@ -51,10 +55,15 @@ type CourseTermRow = {
       }[]
     | null;
 };
+
 type CourseTermDetail = CourseTerm & {
   courseTitle: string;
+
   coursePrice: number;
+  coursePriceTwiceWeekly?: number;
+
   courseCurrency: "EUR";
+
   courseNumberOfLessons: number;
 };
 
@@ -71,6 +80,8 @@ type CourseRow = {
   age_max: number | null;
 
   price: number;
+  price_twice_weekly: number | null;
+
   currency: "EUR";
 
   lesson_duration_minutes: number;
@@ -162,19 +173,6 @@ function mapCourseTerm(term: CourseTermRow): CourseTerm {
 function mapCourse(course: CourseRow): Course {
   const terms = (course.course_terms ?? []).map(mapCourseTerm);
 
-  /**
-   * Course location.
-   *
-   * Currently Course has only one location property,
-   * so we use the first available term location.
-   */
-  const firstLocation = course.course_terms?.find(
-    (term) => term.locations,
-  )?.locations;
-
-  /**
-   * Course status is derived from its terms.
-   */
   let status: CourseStatus = "closed";
 
   if (terms.some((term) => term.status === "available")) {
@@ -203,9 +201,13 @@ function mapCourse(course: CourseRow): Course {
     location: {
       name:
         course.course_terms?.[0]?.locations?.[0]?.name ?? "Neznáma lokalita",
+
       address: course.course_terms?.[0]?.locations?.[0]?.address ?? undefined,
     },
+
     price: course.price,
+
+    priceTwiceWeekly: course.price_twice_weekly ?? undefined,
 
     currency: course.currency,
 
@@ -250,6 +252,7 @@ export async function getCourses(): Promise<Course[]> {
       age_min,
       age_max,
       price,
+      price_twice_weekly,
       currency,
       lesson_duration_minutes,
       number_of_lessons,
@@ -270,12 +273,12 @@ export async function getCourses(): Promise<Course[]> {
         capacity,
         status,
 
-        locations (
+        locations!course_terms_location_id_fkey (
           name,
           address
         ),
 
-        trainers (
+        trainers!course_terms_trainer_id_fkey (
           first_name,
           last_name
         ),
@@ -322,6 +325,7 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
       age_min,
       age_max,
       price,
+      price_twice_weekly,
       currency,
       lesson_duration_minutes,
       number_of_lessons,
@@ -342,16 +346,15 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
         capacity,
         status,
 
-       
-  locations!course_terms_location_id_fkey (
-    name,
-    address
-  ),
+        locations!course_terms_location_id_fkey (
+          name,
+          address
+        ),
 
-  trainers!course_terms_trainer_id_fkey (
-    first_name,
-    last_name
-  ),
+        trainers!course_terms_trainer_id_fkey (
+          first_name,
+          last_name
+        ),
 
         registrations (
           id,
@@ -376,6 +379,10 @@ export async function getCourseBySlug(slug: string): Promise<Course | null> {
 
   return mapCourse(data as CourseRow);
 }
+
+/**
+ * Get one course term by ID.
+ */
 export async function getCourseTermById(
   termId: string,
 ): Promise<CourseTermDetail | null> {
@@ -404,12 +411,12 @@ export async function getCourseTermById(
       capacity,
       status,
 
-      locations (
+      locations!course_terms_location_id_fkey (
         name,
         address
       ),
 
-      trainers (
+      trainers!course_terms_trainer_id_fkey (
         first_name,
         last_name
       ),
@@ -419,9 +426,10 @@ export async function getCourseTermById(
         status
       ),
 
-      courses (
+      courses!course_terms_course_id_fkey (
         title,
         price,
+        price_twice_weekly,
         currency,
         number_of_lessons
       )
@@ -454,8 +462,13 @@ export async function getCourseTermById(
     ...mappedTerm,
 
     courseTitle: course.title,
+
     coursePrice: course.price,
+
+    coursePriceTwiceWeekly: course.price_twice_weekly ?? undefined,
+
     courseCurrency: course.currency,
+
     courseNumberOfLessons: course.number_of_lessons,
   };
 }
