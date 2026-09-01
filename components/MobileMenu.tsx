@@ -5,6 +5,7 @@ import Link from "next/link";
 
 type MobileMenuProps = {
   isAdmin?: boolean;
+  isLoggedIn?: boolean;
 };
 
 const navigation = [
@@ -16,7 +17,10 @@ const navigation = [
   { label: "Kontakt", href: "/kontakt" },
 ];
 
-export default function MobileMenu({ isAdmin = false }: MobileMenuProps) {
+export default function MobileMenu({
+  isAdmin = false,
+  isLoggedIn = false,
+}: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -65,6 +69,16 @@ export default function MobileMenu({ isAdmin = false }: MobileMenuProps) {
               </Link>
             ))}
 
+            {isLoggedIn && (
+              <Link
+                href="/moje-kurzy"
+                onClick={() => setIsOpen(false)}
+                className="border-b border-slate-100 py-4 text-base font-semibold text-[#071b55]"
+              >
+                Moje kurzy
+              </Link>
+            )}
+
             {isAdmin && (
               <Link
                 href="/admin"
@@ -72,6 +86,16 @@ export default function MobileMenu({ isAdmin = false }: MobileMenuProps) {
                 className="border-b border-slate-100 py-4 text-base font-semibold text-[#009ee9]"
               >
                 Administrácia
+              </Link>
+            )}
+
+            {!isLoggedIn && (
+              <Link
+                href="/prihlasenie"
+                onClick={() => setIsOpen(false)}
+                className="border-b border-slate-100 py-4 text-base font-semibold text-[#071b55]"
+              >
+                Prihlásiť sa
               </Link>
             )}
 

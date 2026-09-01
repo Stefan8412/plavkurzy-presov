@@ -61,6 +61,16 @@ export default async function Header() {
               {item.label}
             </Link>
           ))}
+
+          {user && (
+            <Link
+              href="/moje-kurzy"
+              className="text-sm font-semibold text-[#071b55] transition-colors hover:text-[#009ee9]"
+            >
+              Moje kurzy
+            </Link>
+          )}
+
           {isAdmin && (
             <Link
               href="/admin"
@@ -73,7 +83,16 @@ export default async function Header() {
 
         <div className="flex items-center gap-3">
           {user ? (
-            <LogoutButton />
+            <>
+              <Link
+                href="/moje-kurzy"
+                className="hidden text-sm font-semibold text-[#071b55] transition-colors hover:text-[#009ee9] sm:block lg:hidden"
+              >
+                Moje kurzy
+              </Link>
+
+              <LogoutButton />
+            </>
           ) : (
             <Link
               href="/prihlasenie"
@@ -90,7 +109,7 @@ export default async function Header() {
             Vybrať kurz
           </Button>
 
-          <MobileMenu isAdmin={isAdmin} />
+          <MobileMenu isAdmin={isAdmin} isLoggedIn={Boolean(user)} />
         </div>
       </div>
     </header>

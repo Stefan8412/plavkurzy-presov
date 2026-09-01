@@ -142,3 +142,97 @@ export async function cancelOwnRegistration(registrationId: string) {
   revalidatePath("/prihlasenie");
   revalidatePath("/admin");
 }
+export async function createLessonAbsence(formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Musíte byť prihlásený.");
+  }
+
+  const lessonId = String(formData.get("lessonId") ?? "");
+  const childId = String(formData.get("childId") ?? "");
+
+  if (!lessonId || !childId) {
+    throw new Error("Chýbajú údaje o lekcii alebo dieťati.");
+  }
+
+  const { data: child, error: childError } = await supabase
+    .from("children")
+    .select("id, parent_id")
+    .eq("id", childId)
+    .single();
+
+  if (childError || !child) {
+    throw new Error("Dieťa sa nepodarilo nájsť.");
+  }
+
+  if (child.parent_id !== user.id) {
+    throw new Error("K tomuto dieťaťu nemáte prístup.");
+  }
+
+  const { error } = await supabase.from("lesson_absences").insert({
+    lesson_id: lessonId,
+    child_id: childId,
+  });
+
+  if (error) {
+    if (error.code === "23505") {
+      throw new Error("Dieťa je už z tejto lekcie odhlásené.");
+    }
+
+    console.error("Chyba pri odhlásení z lekcie:", error);
+    throw new Error("Dieťa sa nepodarilo odhlásiť z lekcie.");
+  }
+
+  revalidatePath("/prihlasenie");
+}
+
+export async function cancelLessonAbsence(formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Musíte byť prihlásený.");
+  }
+
+  const absenceId = String(formData.get("absenceId") ?? "");
+  const childId = String(formData.get("childId") ?? "");
+
+  if (!absenceId || !childId) {
+    throw new Error("Chýbajú údaje o odhlásení alebo dieťati.");
+  }
+
+  const { data: child, error: childError } = await supabase
+    .from("children")
+    .select("id, parent_id")
+    .eq("id", childId)
+    .single();
+
+  if (childError || !child) {
+    throw new Error("Dieťa sa nepodarilo nájsť.");
+  }
+
+  if (child.parent_id !== user.id) {
+    throw new Error("K tomuto dieťaťu nemáte prístup.");
+  }
+
+  const { error } = await supabase
+    .from("lesson_absences")
+    .delete()
+    .eq("id", absenceId)
+    .eq("child_id", childId);
+
+  if (error) {
+    console.error("Chyba pri zrušení odhlásenia:", error);
+    throw new Error("Odhlásenie sa nepodarilo zrušiť.");
+  }
+
+  revalidatePath("/prihlasenie");
+}

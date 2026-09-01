@@ -8,6 +8,8 @@ import { getChildren } from "@/lib/data/children";
 import { getRegistrationForChildAndTerm } from "@/lib/data/registrations";
 import RegistrationForm from "./RegistrationForm";
 import { cancelOwnRegistration } from "./actions";
+import { getLessonsForChildRegistration } from "@/lib/data/lessons";
+import LessonsList from "./LessonsList";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -322,6 +324,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     existingRegistrations.some(
       (registration) => registration?.status === "cancelled",
     );
+  const lessons =
+    selectedChild && childId && activeExistingRegistration
+      ? await getLessonsForChildRegistration(childId, [
+          termId,
+          ...(frequency === 2 && secondTermId ? [secondTermId] : []),
+        ])
+      : [];
+  console.log("LESSONS DEBUG", {
+    childId,
+    frequency,
+    termId,
+    secondTermId,
+    activeRegistration: activeExistingRegistration?.status,
+    lessonsCount: lessons.length,
+  });
 
   if (childId && !selectedChild) {
     return (
@@ -521,6 +538,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           </div>
         </section>
+        {activeExistingRegistration &&
+          (activeExistingRegistration.status === "pending" ||
+            activeExistingRegistration.status === "confirmed") && (
+            <LessonsList childId={childId!} lessons={lessons} />
+          )}
       </main>
     );
   }
