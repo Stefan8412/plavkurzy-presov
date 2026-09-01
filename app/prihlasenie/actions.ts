@@ -15,6 +15,8 @@ export async function registerChildForCourse(
 ): Promise<RegistrationActionState> {
   const childId = formData.get("childId");
   const courseTermId = formData.get("courseTermId");
+  const secondCourseTermId = formData.get("secondCourseTermId");
+  const frequencyValue = formData.get("frequency");
 
   if (typeof childId !== "string" || !childId) {
     return {
@@ -30,10 +32,26 @@ export async function registerChildForCourse(
     };
   }
 
+  const frequency = frequencyValue === "2" ? 2 : 1;
+
+  const courseTermIds = [courseTermId];
+
+  if (frequency === 2) {
+    if (typeof secondCourseTermId !== "string" || !secondCourseTermId) {
+      return {
+        success: false,
+        message: "Pri frekvencii 2× týždenne musíte vybrať dva termíny.",
+      };
+    }
+
+    courseTermIds.push(secondCourseTermId);
+  }
+
   try {
     const result = await createRegistration({
       childId,
-      courseTermId,
+      courseTermIds,
+      frequency,
     });
 
     if (!result.success) {
@@ -42,10 +60,16 @@ export async function registerChildForCourse(
         message: result.error,
       };
     }
+
     revalidatePath("/prihlasenie");
+    revalidatePath("/kurzy");
+
     return {
       success: true,
-      message: "Prihláška bola úspešne odoslaná.",
+      message:
+        frequency === 2
+          ? "Prihláška na dva termíny bola úspešne odoslaná."
+          : "Prihláška bola úspešne odoslaná.",
     };
   } catch (error) {
     console.error("Registration action failed:", error);
@@ -74,6 +98,7 @@ export async function cancelOwnRegistration(registrationId: string) {
       `
       id,
       status,
+      registration_group_id,
       children!registrations_child_id_fkey (
         parent_id
       )
@@ -107,7 +132,7 @@ export async function cancelOwnRegistration(registrationId: string) {
       status: "cancelled",
       updated_at: new Date().toISOString(),
     })
-    .eq("id", registrationId);
+    .eq("registration_group_id", registration.registration_group_id);
 
   if (error) {
     console.error("Failed to cancel registration:", error);
@@ -115,4 +140,5 @@ export async function cancelOwnRegistration(registrationId: string) {
   }
 
   revalidatePath("/prihlasenie");
+  revalidatePath("/admin");
 }

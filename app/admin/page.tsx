@@ -145,7 +145,15 @@ export default async function AdminPage() {
                     </th>
 
                     <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                      Termín
+                      Frekvencia
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Termíny
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Cena
                     </th>
 
                     <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -155,6 +163,7 @@ export default async function AdminPage() {
                     <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
                       Prihlásené
                     </th>
+
                     <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
                       Akcie
                     </th>
@@ -164,7 +173,7 @@ export default async function AdminPage() {
                 <tbody className="divide-y divide-slate-100">
                   {registrations.map((registration) => (
                     <tr
-                      key={registration.id}
+                      key={registration.registrationGroupId}
                       className="transition hover:bg-slate-50"
                     >
                       <td className="whitespace-nowrap px-6 py-5">
@@ -196,21 +205,39 @@ export default async function AdminPage() {
                         </p>
                       </td>
 
-                      <td className="whitespace-nowrap px-6 py-5 text-sm">
-                        <p className="font-medium text-slate-900">
-                          {dayLabels[registration.term.dayOfWeek] ?? "—"}{" "}
-                          {registration.term.startTime
-                            ? registration.term.startTime.slice(0, 5)
-                            : ""}
-                        </p>
+                      <td className="whitespace-nowrap px-6 py-5">
+                        <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                          {registration.frequencyPerWeek}× týždenne
+                        </span>
+                      </td>
 
-                        <p className="mt-1 text-slate-500">
-                          {registration.term.startDate
-                            ? formatDate(registration.term.startDate)
-                            : "—"}
-                          {" – "}
-                          {registration.term.endDate
-                            ? formatDate(registration.term.endDate)
+                      <td className="px-6 py-5 text-sm">
+                        <div className="space-y-3">
+                          {registration.terms.map((term) => (
+                            <div key={term.id}>
+                              <p className="font-medium text-slate-900">
+                                {dayLabels[term.dayOfWeek] ?? "—"}{" "}
+                                {term.startTime
+                                  ? term.startTime.slice(0, 5)
+                                  : ""}
+                              </p>
+
+                              <p className="mt-1 text-slate-500">
+                                {term.startDate
+                                  ? formatDate(term.startDate)
+                                  : "—"}
+                                {" – "}
+                                {term.endDate ? formatDate(term.endDate) : "—"}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+
+                      <td className="whitespace-nowrap px-6 py-5">
+                        <p className="font-semibold text-slate-900">
+                          {registration.totalPrice !== null
+                            ? `${registration.totalPrice} €`
                             : "—"}
                         </p>
                       </td>
@@ -235,23 +262,25 @@ export default async function AdminPage() {
                       <td className="whitespace-nowrap px-6 py-5 text-sm text-slate-600">
                         {formatDateTime(registration.registeredAt)}
                       </td>
+
                       <td className="whitespace-nowrap px-6 py-5">
                         <div className="flex flex-wrap gap-2">
-                          {registration.status !== "confirmed" && (
-                            <form
-                              action={confirmRegistration.bind(
-                                null,
-                                registration.id,
-                              )}
-                            >
-                              <button
-                                type="submit"
-                                className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                          {registration.status !== "confirmed" &&
+                            registration.status !== "cancelled" && (
+                              <form
+                                action={confirmRegistration.bind(
+                                  null,
+                                  registration.id,
+                                )}
                               >
-                                Potvrdiť
-                              </button>
-                            </form>
-                          )}
+                                <button
+                                  type="submit"
+                                  className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                                >
+                                  Potvrdiť
+                                </button>
+                              </form>
+                            )}
 
                           {registration.status !== "cancelled" && (
                             <form

@@ -9,6 +9,8 @@ import {
 type RegistrationFormProps = {
   childId: string;
   courseTermId: string;
+  secondCourseTermId?: string;
+  frequency?: 1 | 2;
 };
 
 const initialState: RegistrationActionState = {
@@ -19,6 +21,8 @@ const initialState: RegistrationActionState = {
 export default function RegistrationForm({
   childId,
   courseTermId,
+  secondCourseTermId,
+  frequency = 1,
 }: RegistrationFormProps) {
   const [state, formAction, isPending] = useActionState(
     registerChildForCourse,
@@ -33,7 +37,9 @@ export default function RegistrationForm({
         </h3>
 
         <p className="mt-2 text-sm text-emerald-700">
-          Dieťa bolo prihlásené na vybraný termín.
+          {frequency === 2
+            ? "Dieťa bolo prihlásené na oba vybrané termíny."
+            : "Dieťa bolo prihlásené na vybraný termín."}
         </p>
       </div>
     );
@@ -44,6 +50,16 @@ export default function RegistrationForm({
       <input type="hidden" name="childId" value={childId} />
 
       <input type="hidden" name="courseTermId" value={courseTermId} />
+
+      {secondCourseTermId && (
+        <input
+          type="hidden"
+          name="secondCourseTermId"
+          value={secondCourseTermId}
+        />
+      )}
+
+      <input type="hidden" name="frequency" value={frequency} />
 
       {state.message && (
         <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4">
@@ -56,7 +72,11 @@ export default function RegistrationForm({
         disabled={isPending}
         className="w-full rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isPending ? "Odosielam prihlášku..." : "Potvrdiť prihlášku"}
+        {isPending
+          ? "Odosielam prihlášku..."
+          : frequency === 2
+            ? "Potvrdiť prihlášku na oba termíny"
+            : "Potvrdiť prihlášku"}
       </button>
     </form>
   );

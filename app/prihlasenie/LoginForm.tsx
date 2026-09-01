@@ -6,9 +6,15 @@ import { useRouter } from "next/navigation";
 
 type LoginFormProps = {
   termId?: string;
+  secondTermId?: string;
+  frequency?: 1 | 2;
 };
 
-export default function LoginForm({ termId }: LoginFormProps) {
+export default function LoginForm({
+  termId,
+  secondTermId,
+  frequency = 1,
+}: LoginFormProps) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -64,9 +70,22 @@ export default function LoginForm({ termId }: LoginFormProps) {
       return;
     }
 
-    const redirectUrl = termId ? `/prihlasenie?term=${termId}` : "/kurzy";
+    if (!termId) {
+      router.push("/kurzy");
+      router.refresh();
+      return;
+    }
 
-    router.push(redirectUrl);
+    const params = new URLSearchParams();
+
+    params.set("term", termId);
+    params.set("frequency", String(frequency));
+
+    if (frequency === 2 && secondTermId) {
+      params.set("term2", secondTermId);
+    }
+
+    router.push(`/prihlasenie?${params.toString()}`);
     router.refresh();
   }
 

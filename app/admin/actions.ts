@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+
 import { createClient } from "@/lib/supabase/server";
 
 async function requireAdmin() {
@@ -27,8 +28,28 @@ async function requireAdmin() {
   return supabase;
 }
 
-export async function confirmRegistration(registrationId: string) {
+async function getRegistrationGroupId(registrationId: string) {
   const supabase = await requireAdmin();
+
+  const { data: registration, error } = await supabase
+    .from("registrations")
+    .select("registration_group_id")
+    .eq("id", registrationId)
+    .single();
+
+  if (error || !registration?.registration_group_id) {
+    throw new Error("Registrácia sa nenašla.");
+  }
+
+  return {
+    supabase,
+    registrationGroupId: registration.registration_group_id,
+  };
+}
+
+export async function confirmRegistration(registrationId: string) {
+  const { supabase, registrationGroupId } =
+    await getRegistrationGroupId(registrationId);
 
   const { error } = await supabase
     .from("registrations")
@@ -36,7 +57,7 @@ export async function confirmRegistration(registrationId: string) {
       status: "confirmed",
       updated_at: new Date().toISOString(),
     })
-    .eq("id", registrationId);
+    .eq("registration_group_id", registrationGroupId);
 
   if (error) {
     console.error("Failed to confirm registration:", error);
@@ -44,10 +65,12 @@ export async function confirmRegistration(registrationId: string) {
   }
 
   revalidatePath("/admin");
+  revalidatePath("/prihlasenie");
 }
 
 export async function cancelRegistration(registrationId: string) {
-  const supabase = await requireAdmin();
+  const { supabase, registrationGroupId } =
+    await getRegistrationGroupId(registrationId);
 
   const { error } = await supabase
     .from("registrations")
@@ -55,7 +78,7 @@ export async function cancelRegistration(registrationId: string) {
       status: "cancelled",
       updated_at: new Date().toISOString(),
     })
-    .eq("id", registrationId);
+    .eq("registration_group_id", registrationGroupId);
 
   if (error) {
     console.error("Failed to cancel registration:", error);
@@ -63,4 +86,5 @@ export async function cancelRegistration(registrationId: string) {
   }
 
   revalidatePath("/admin");
+  revalidatePath("/prihlasenie");
 }

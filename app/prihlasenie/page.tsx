@@ -12,6 +12,8 @@ import { cancelOwnRegistration } from "./actions";
 type LoginPageProps = {
   searchParams: Promise<{
     term?: string;
+    term2?: string;
+    frequency?: string;
     child?: string;
   }>;
 };
@@ -26,15 +28,41 @@ const dayLabels = {
   sunday: "Nedeľa",
 };
 
+function buildRegistrationUrl({
+  termId,
+  secondTermId,
+  frequency,
+  childId,
+}: {
+  termId: string;
+  secondTermId?: string;
+  frequency: 1 | 2;
+  childId?: string;
+}) {
+  const params = new URLSearchParams();
+
+  params.set("term", termId);
+  params.set("frequency", String(frequency));
+
+  if (frequency === 2 && secondTermId) {
+    params.set("term2", secondTermId);
+  }
+
+  if (childId) {
+    params.set("child", childId);
+  }
+
+  return `/prihlasenie?${params.toString()}`;
+}
+
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
 
   const termId = params.term;
+  const secondTermId = params.term2;
   const childId = params.child;
 
-  // --------------------------------------------------
-  // Supabase + používateľ
-  // --------------------------------------------------
+  const frequency: 1 | 2 = params.frequency === "2" && secondTermId ? 2 : 1;
 
   const supabase = await createClient();
 
@@ -42,13 +70,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // --------------------------------------------------
-  // Prihlásenie bez vybraného termínu
-  // --------------------------------------------------
-
   if (!termId) {
-    // Ak je používateľ už prihlásený,
-    // zistíme jeho rolu.
     if (user) {
       const { data: profile } = await supabase
         .from("profiles")
@@ -60,12 +82,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         redirect("/admin");
       }
 
-      // Prihlásený rodič bez konkrétneho termínu
-      // pokračuje na zoznam kurzov.
       redirect("/kurzy");
     }
 
-    // Neprihlásený používateľ → klasický login
     return (
       <main className="mx-auto max-w-xl px-6 py-16 lg:px-8">
         <Link
@@ -105,13 +124,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     );
   }
 
-  // --------------------------------------------------
-  // Termín
-  // --------------------------------------------------
-
   const term = await getCourseTermById(termId);
 
-  if (!term) {
+  const secondTerm =
+    frequency === 2 && secondTermId
+      ? await getCourseTermById(secondTermId)
+      : null;
+
+  if (!term || (frequency === 2 && !secondTerm)) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-16 lg:px-8">
         <Link
@@ -127,7 +147,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </h1>
 
           <p className="mt-3 text-slate-600">
-            Tento termín už nemusí byť dostupný.
+            Jeden z vybraných termínov už nemusí byť dostupný.
           </p>
 
           <Link
@@ -141,11 +161,49 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     );
   }
 
-  const isAvailable = term.status === "available" && term.availableSpots > 0;
+  if (
+    frequency === 2 &&
+    secondTerm &&
+    secondTerm.courseTitle !== term.courseTitle
+  ) {
+    return (
+      <main className="mx-auto max-w-3xl px-6 py-16 lg:px-8">
+        <Link
+          href="/kurzy"
+          className="text-sm font-medium text-sky-600 hover:text-sky-700"
+        >
+          ← Späť na kurzy
+        </Link>
 
-  // --------------------------------------------------
-  // Ak používateľ nie je prihlásený
-  // --------------------------------------------------
+        <div className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
+          <h1 className="text-2xl font-bold text-red-900">
+            Neplatná kombinácia termínov
+          </h1>
+
+          <p className="mt-3 text-red-700">
+            Vybrané termíny nepatria do rovnakého kurzu.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  const firstTermAvailable =
+    term.status === "available" && term.availableSpots > 0;
+
+  const secondTermAvailable =
+    frequency === 1 ||
+    (!!secondTerm &&
+      secondTerm.status === "available" &&
+      secondTerm.availableSpots > 0);
+
+  const isAvailable = firstTermAvailable && secondTermAvailable;
+
+  const baseRegistrationUrl = buildRegistrationUrl({
+    termId,
+    secondTermId,
+    frequency,
+  });
 
   if (!user) {
     return (
@@ -162,54 +220,39 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Prihlásenie na kurz
           </h1>
 
-          <p className="mt-3 text-slate-600">Vybraný termín</p>
+          <p className="mt-3 text-slate-600">
+            Vybrali ste plávanie {frequency}× týždenne.
+          </p>
         </div>
 
-        {/* Termín */}
         <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Termín kurzu</p>
+          <p className="text-sm font-medium text-slate-500">
+            {frequency === 2 ? "Vybrané termíny" : "Vybraný termín"}
+          </p>
 
-              <h2 className="mt-2 text-xl font-bold text-slate-950">
-                {dayLabels[term.dayOfWeek]}
+          <div className="mt-4">
+            <h2 className="text-xl font-bold text-slate-950">
+              {dayLabels[term.dayOfWeek]}
+            </h2>
+
+            <p className="mt-1 text-lg font-semibold text-sky-600">
+              {term.startTime} – {term.endTime}
+            </p>
+          </div>
+
+          {frequency === 2 && secondTerm && (
+            <div className="mt-5 border-t border-slate-100 pt-5">
+              <h2 className="text-xl font-bold text-slate-950">
+                {dayLabels[secondTerm.dayOfWeek]}
               </h2>
 
               <p className="mt-1 text-lg font-semibold text-sky-600">
-                {term.startTime} – {term.endTime}
-              </p>
-
-              <p className="mt-2 text-sm text-slate-500">
-                {term.startDate} – {term.endDate}
-              </p>
-
-              {term.trainerName && (
-                <p className="mt-3 text-sm text-slate-600">
-                  Tréner:{" "}
-                  <span className="font-medium text-slate-900">
-                    {term.trainerName}
-                  </span>
-                </p>
-              )}
-            </div>
-
-            <div className="sm:text-right">
-              <p className="text-xs text-slate-500">Voľné miesta</p>
-
-              <p
-                className={`mt-1 text-lg font-bold ${
-                  isAvailable ? "text-emerald-600" : "text-slate-500"
-                }`}
-              >
-                {isAvailable
-                  ? `${term.availableSpots} / ${term.capacity}`
-                  : "Obsadené"}
+                {secondTerm.startTime} – {secondTerm.endTime}
               </p>
             </div>
-          </div>
+          )}
         </section>
 
-        {/* Login */}
         <section className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-8">
           <h2 className="text-xl font-bold text-slate-950">Prihlásenie</h2>
 
@@ -218,7 +261,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
 
           <div className="mt-6">
-            <LoginForm termId={termId} />
+            <LoginForm
+              termId={termId}
+              secondTermId={secondTermId}
+              frequency={frequency}
+            />
           </div>
 
           <p className="mt-6 text-center text-sm text-slate-500">
@@ -226,7 +273,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
 
           <Link
-            href={`/registracia?term=${termId}`}
+            href={`/registracia?${new URLSearchParams({
+              term: termId,
+              frequency: String(frequency),
+              ...(frequency === 2 && secondTermId
+                ? { term2: secondTermId }
+                : {}),
+            }).toString()}`}
             className="mt-2 block text-center text-sm font-semibold text-sky-600 hover:text-sky-700"
           >
             Vytvoriť účet
@@ -236,37 +289,45 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     );
   }
 
-  // --------------------------------------------------
-  // Prihlásený používateľ → deti
-  // --------------------------------------------------
-
   const children = await getChildren();
-
-  // --------------------------------------------------
-  // Ak máme childId → overíme, že patrí používateľovi
-  // --------------------------------------------------
 
   const selectedChild = childId
     ? children.find((child) => child.id === childId)
     : undefined;
 
-  const existingRegistration =
+  const existingRegistrations =
     selectedChild && childId
-      ? await getRegistrationForChildAndTerm({
-          childId,
-          courseTermId: termId,
-        })
-      : null;
+      ? await Promise.all([
+          getRegistrationForChildAndTerm({
+            childId,
+            courseTermId: termId,
+          }),
+          ...(frequency === 2 && secondTermId
+            ? [
+                getRegistrationForChildAndTerm({
+                  childId,
+                  courseTermId: secondTermId,
+                }),
+              ]
+            : []),
+        ])
+      : [];
 
-  // --------------------------------------------------
-  // Vybrané dieťa
-  // --------------------------------------------------
+  const activeExistingRegistration = existingRegistrations.find(
+    (registration) => registration && registration.status !== "cancelled",
+  );
+
+  const hasCancelledRegistration =
+    !activeExistingRegistration &&
+    existingRegistrations.some(
+      (registration) => registration?.status === "cancelled",
+    );
 
   if (childId && !selectedChild) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-16 lg:px-8">
         <Link
-          href={`/prihlasenie?term=${termId}`}
+          href={baseRegistrationUrl}
           className="text-sm font-medium text-sky-600 hover:text-sky-700"
         >
           ← Späť na výber dieťaťa
@@ -283,15 +344,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     );
   }
 
-  // --------------------------------------------------
-  // Súhrn registrácie
-  // --------------------------------------------------
-
   if (selectedChild) {
+    const totalPrice =
+      frequency === 2 ? term.coursePriceTwiceWeekly : term.coursePrice;
+
     return (
       <main className="mx-auto max-w-3xl px-6 py-16 lg:px-8">
         <Link
-          href={`/prihlasenie?term=${termId}`}
+          href={baseRegistrationUrl}
           className="text-sm font-medium text-sky-600 hover:text-sky-700"
         >
           ← Zmeniť dieťa
@@ -307,7 +367,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
         </div>
 
-        {/* Dieťa */}
         <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-slate-500">
             Prihlasované dieťa
@@ -321,20 +380,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Narodenie:{" "}
             {new Date(selectedChild.dateOfBirth).toLocaleDateString("sk-SK")}
           </p>
-
-          {selectedChild.gender && (
-            <p className="mt-1 text-sm text-slate-500">
-              Pohlavie:{" "}
-              {selectedChild.gender === "male"
-                ? "Chlapec"
-                : selectedChild.gender === "female"
-                  ? "Dievča"
-                  : "Iné"}
-            </p>
-          )}
         </section>
 
-        {/* Termín */}
         <section className="mt-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-slate-500">Kurz</p>
 
@@ -342,12 +389,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             {term.courseTitle}
           </h2>
 
-          <div className="mt-5 border-t border-slate-100 pt-5">
-            <p className="text-sm font-medium text-slate-500">Vybraný termín</p>
+          <p className="mt-2 text-sm font-semibold text-sky-700">
+            {frequency}× týždenne
+          </p>
 
-            <h2 className="mt-2 text-xl font-bold text-slate-950">
+          <div className="mt-5 border-t border-slate-100 pt-5">
+            <p className="text-sm font-medium text-slate-500">
+              {frequency === 2 ? "1. termín" : "Vybraný termín"}
+            </p>
+
+            <h3 className="mt-2 text-xl font-bold text-slate-950">
               {dayLabels[term.dayOfWeek]}
-            </h2>
+            </h3>
 
             <p className="mt-1 text-lg font-semibold text-sky-600">
               {term.startTime} – {term.endTime}
@@ -356,78 +409,45 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <p className="mt-2 text-sm text-slate-500">
               {term.startDate} – {term.endDate}
             </p>
-
-            {term.trainerName && (
-              <p className="mt-3 text-sm text-slate-600">
-                Tréner:{" "}
-                <span className="font-medium text-slate-900">
-                  {term.trainerName}
-                </span>
-              </p>
-            )}
-
-            <div className="mt-5 border-t border-slate-100 pt-5">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500">Voľné miesta</span>
-
-                <span
-                  className={`text-sm font-semibold ${
-                    isAvailable ? "text-emerald-600" : "text-slate-500"
-                  }`}
-                >
-                  {isAvailable
-                    ? `${term.availableSpots} / ${term.capacity}`
-                    : "Obsadené"}
-                </span>
-              </div>
-            </div>
           </div>
+
+          {frequency === 2 && secondTerm && (
+            <div className="mt-5 border-t border-slate-100 pt-5">
+              <p className="text-sm font-medium text-slate-500">2. termín</p>
+
+              <h3 className="mt-2 text-xl font-bold text-slate-950">
+                {dayLabels[secondTerm.dayOfWeek]}
+              </h3>
+
+              <p className="mt-1 text-lg font-semibold text-sky-600">
+                {secondTerm.startTime} – {secondTerm.endTime}
+              </p>
+
+              <p className="mt-2 text-sm text-slate-500">
+                {secondTerm.startDate} – {secondTerm.endDate}
+              </p>
+            </div>
+          )}
         </section>
 
-        {/* Ďalší krok */}
         <section className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-6">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm text-slate-500">Cena kurzu</p>
+              <p className="text-sm text-slate-500">
+                Cena kurzu – {frequency}× týždenne
+              </p>
 
               <p className="mt-1 text-2xl font-bold text-slate-950">
-                {term.coursePrice} {term.courseCurrency}
+                {totalPrice} {term.courseCurrency}
               </p>
             </div>
 
             <div className="w-full sm:w-auto">
-              {existingRegistration?.status === "cancelled" ? (
-                <div className="space-y-4">
-                  <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-                    <p className="font-semibold text-red-800">
-                      Registrácia bola zrušená
-                    </p>
-
-                    <p className="mt-1 text-sm text-red-700">
-                      Dieťa môžete na tento termín znovu prihlásiť.
-                    </p>
-                  </div>
-
-                  {isAvailable && childId ? (
-                    <RegistrationForm childId={childId} courseTermId={termId} />
-                  ) : (
-                    <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-500">
-                      Termín je obsadený
-                    </span>
-                  )}
-
-                  <Link
-                    href={`/prihlasenie?term=${termId}`}
-                    className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-                  >
-                    Vybrať iné dieťa
-                  </Link>
-                </div>
-              ) : existingRegistration ? (
+              {activeExistingRegistration ? (
                 <div className="space-y-4">
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
                     <p className="font-semibold text-emerald-800">
-                      {existingRegistration.status === "completed"
+                      {activeExistingRegistration.status === "completed"
                         ? "Kurz bol dokončený"
                         : "Dieťa je už prihlásené"}
                     </p>
@@ -435,30 +455,28 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                     <p className="mt-1 text-sm text-emerald-700">
                       Stav:{" "}
                       <span className="font-semibold">
-                        {existingRegistration.status === "pending"
+                        {activeExistingRegistration.status === "pending"
                           ? "Čaká na potvrdenie"
-                          : existingRegistration.status === "confirmed"
+                          : activeExistingRegistration.status === "confirmed"
                             ? "Potvrdená"
-                            : existingRegistration.status === "completed"
-                              ? "Dokončená"
-                              : "Zrušená"}
+                            : "Dokončená"}
                       </span>
                     </p>
                   </div>
 
                   <Link
-                    href={`/prihlasenie?term=${termId}`}
+                    href={baseRegistrationUrl}
                     className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
                   >
                     Vybrať iné dieťa
                   </Link>
 
-                  {(existingRegistration.status === "pending" ||
-                    existingRegistration.status === "confirmed") && (
+                  {(activeExistingRegistration.status === "pending" ||
+                    activeExistingRegistration.status === "confirmed") && (
                     <form
                       action={cancelOwnRegistration.bind(
                         null,
-                        existingRegistration.id,
+                        activeExistingRegistration.id,
                       )}
                     >
                       <button
@@ -470,16 +488,35 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                     </form>
                   )}
                 </div>
-              ) : isAvailable && childId ? (
-                <RegistrationForm childId={childId} courseTermId={termId} />
-              ) : isAvailable ? (
-                <span className="text-sm text-slate-500">
-                  Najprv vyberte dieťa.
-                </span>
               ) : (
-                <span className="rounded-full bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-500">
-                  Termín je obsadený
-                </span>
+                <div className="space-y-4">
+                  {hasCancelledRegistration && (
+                    <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+                      <p className="font-semibold text-red-800">
+                        Registrácia bola zrušená
+                      </p>
+
+                      <p className="mt-1 text-sm text-red-700">
+                        Dieťa môžete znovu prihlásiť.
+                      </p>
+                    </div>
+                  )}
+
+                  {isAvailable && childId ? (
+                    <RegistrationForm
+                      childId={childId}
+                      courseTermId={termId}
+                      secondCourseTermId={
+                        frequency === 2 ? secondTermId : undefined
+                      }
+                      frequency={frequency}
+                    />
+                  ) : (
+                    <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-500">
+                      Jeden z termínov je obsadený
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -487,10 +524,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </main>
     );
   }
-
-  // --------------------------------------------------
-  // Zoznam detí
-  // --------------------------------------------------
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 lg:px-8">
@@ -507,28 +540,38 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </h1>
 
         <p className="mt-3 text-slate-600">
-          Vyberte dieťa, ktoré chcete prihlásiť na tento termín.
+          Vyberte dieťa, ktoré chcete prihlásiť na kurz.
         </p>
       </div>
 
-      {/* Termín */}
       <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium text-slate-500">Vybraný termín</p>
-
-        <h2 className="mt-2 text-xl font-bold text-slate-950">
-          {dayLabels[term.dayOfWeek]}
-        </h2>
-
-        <p className="mt-1 text-lg font-semibold text-sky-600">
-          {term.startTime} – {term.endTime}
+        <p className="text-sm font-medium text-slate-500">
+          {frequency === 2 ? "Vybrané termíny" : "Vybraný termín"}
         </p>
 
-        <p className="mt-2 text-sm text-slate-500">
-          {term.startDate} – {term.endDate}
-        </p>
+        <div className="mt-4">
+          <h2 className="text-xl font-bold text-slate-950">
+            {dayLabels[term.dayOfWeek]}
+          </h2>
+
+          <p className="mt-1 text-lg font-semibold text-sky-600">
+            {term.startTime} – {term.endTime}
+          </p>
+        </div>
+
+        {frequency === 2 && secondTerm && (
+          <div className="mt-5 border-t border-slate-100 pt-5">
+            <h2 className="text-xl font-bold text-slate-950">
+              {dayLabels[secondTerm.dayOfWeek]}
+            </h2>
+
+            <p className="mt-1 text-lg font-semibold text-sky-600">
+              {secondTerm.startTime} – {secondTerm.endTime}
+            </p>
+          </div>
+        )}
       </section>
 
-      {/* Deti */}
       <section className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-8">
         <h2 className="text-xl font-bold text-slate-950">Vyberte dieťa</h2>
 
@@ -574,7 +617,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                     </div>
 
                     <Link
-                      href={`/prihlasenie?term=${termId}&child=${child.id}`}
+                      href={buildRegistrationUrl({
+                        termId,
+                        secondTermId,
+                        frequency,
+                        childId: child.id,
+                      })}
                       className="inline-flex items-center justify-center rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
                     >
                       Vybrať dieťa

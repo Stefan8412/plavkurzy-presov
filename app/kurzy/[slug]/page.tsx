@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CourseTerm from "@/components/courses/CourseTerm";
+import CourseTermSelector from "@/components/courses/CourseTermSelector";
 import { getCourseBySlug } from "@/lib/data/courses";
-import type { Course } from "@/types/course";
 import type { CourseLevel, CourseCategory } from "@/types/course";
 
 type CourseDetailPageProps = {
@@ -37,7 +36,6 @@ export default async function CourseDetailPage({
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-      {/* Back */}
       <Link
         href="/kurzy"
         className="text-sm font-medium text-sky-600 hover:text-sky-700"
@@ -45,7 +43,6 @@ export default async function CourseDetailPage({
         ← Späť na kurzy
       </Link>
 
-      {/* Header */}
       <div className="mt-8 grid gap-12 lg:grid-cols-[1.4fr_0.6fr]">
         <div>
           <div className="flex flex-wrap gap-2">
@@ -77,24 +74,56 @@ export default async function CourseDetailPage({
 
         {/* Price */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-500">Cena kurzu</p>
-
-          <p className="mt-2 text-4xl font-bold text-slate-950">
-            {course.price} €
+          <p className="text-sm font-semibold text-slate-500">
+            Členský príspevok
           </p>
 
-          <p className="mt-1 text-sm text-slate-500">
-            {course.numberOfLessons} lekcií
+          <div className="mt-5 space-y-3">
+            <div className="rounded-2xl bg-sky-50 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-slate-950">1× týždenne</p>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    Jeden vybraný termín
+                  </p>
+                </div>
+
+                <p className="text-2xl font-bold text-[#071b55]">
+                  {course.price} €
+                </p>
+              </div>
+            </div>
+
+            {course.priceTwiceWeekly !== undefined && (
+              <div className="rounded-2xl bg-sky-50 p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-slate-950">2× týždenne</p>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      Dva vybrané termíny
+                    </p>
+                  </div>
+
+                  <p className="text-2xl font-bold text-[#071b55]">
+                    {course.priceTwiceWeekly} €
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <p className="mt-5 text-sm leading-6 text-slate-500">
+            Kurz prebieha v období od 21. 9. 2026 do 22. 1. 2027.
           </p>
 
-          <Link
-            href={
-              course.terms[0] ? `/prihlasenie?term=${course.terms[0].id}` : "#"
-            }
+          <a
+            href="#terminy"
             className="mt-6 flex w-full items-center justify-center rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
           >
-            Vybrať termín
-          </Link>
+            Vybrať frekvenciu a termín
+          </a>
         </div>
       </div>
 
@@ -124,10 +153,10 @@ export default async function CourseDetailPage({
           </div>
 
           <div className="rounded-2xl bg-slate-50 p-6">
-            <p className="text-sm text-slate-500">Počet lekcií</p>
+            <p className="text-sm text-slate-500">Obdobie kurzu</p>
 
             <p className="mt-2 font-semibold text-slate-950">
-              {course.numberOfLessons}
+              21. 9. 2026 – 22. 1. 2027
             </p>
           </div>
 
@@ -170,20 +199,25 @@ export default async function CourseDetailPage({
       )}
 
       {/* Terms */}
-      <section className="mt-16">
+      <section id="terminy" className="mt-16 scroll-mt-28">
         <div>
           <h2 className="text-2xl font-bold text-slate-950">
-            Dostupné termíny
+            Vyberte si deň a čas
           </h2>
 
           <p className="mt-2 text-slate-600">
-            Vyberte si termín, ktorý vám najviac vyhovuje.
+            Pri plávaní 1× týždenne vyberiete jeden termín. Pri plávaní 2×
+            týždenne vyberiete dva termíny.
           </p>
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6">
           {course.terms.length > 0 ? (
-            course.terms.map((term) => <CourseTerm key={term.id} term={term} />)
+            <CourseTermSelector
+              terms={course.terms}
+              priceOnceWeekly={course.price}
+              priceTwiceWeekly={course.priceTwiceWeekly}
+            />
           ) : (
             <div className="rounded-2xl bg-slate-50 p-8 text-center">
               <p className="text-sm text-slate-500">
