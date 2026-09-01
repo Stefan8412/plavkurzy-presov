@@ -78,6 +78,23 @@ export async function getMyCourseRegistrations(): Promise<
     return [];
   }
 
+  const { data: childrenData, error: childrenError } = await supabase
+    .from("children")
+    .select("id")
+    .eq("parent_id", user.id);
+
+  if (childrenError) {
+    console.error("Chyba pri načítaní detí používateľa:", childrenError);
+
+    throw new Error("Nepodarilo sa načítať vaše deti.");
+  }
+
+  const childIds = (childrenData ?? []).map((child) => child.id);
+
+  if (childIds.length === 0) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("registrations")
     .select(
@@ -99,6 +116,7 @@ export async function getMyCourseRegistrations(): Promise<
       )
     `,
     )
+    .in("child_id", childIds)
     .in("status", ["pending", "confirmed", "completed"])
     .order("registered_at", { ascending: false });
 

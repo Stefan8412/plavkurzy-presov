@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminRegistrations } from "@/lib/data/admin";
+import { getAdminLessons } from "@/lib/data/admin-lessons";
 
 import { confirmRegistration, cancelRegistration } from "./actions";
 
@@ -53,7 +54,21 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const registrations = await getAdminRegistrations();
+  const [registrations, lessons] = await Promise.all([
+    getAdminRegistrations(),
+    getAdminLessons(),
+  ]);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingLessons = lessons
+    .filter((lesson) => {
+      const lessonDate = new Date(`${lesson.lessonDate}T12:00:00`);
+
+      return lessonDate >= today && lesson.status !== "cancelled";
+    })
+    .slice(0, 12);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -306,6 +321,95 @@ export default async function AdminPage() {
             </div>
           )}
         </div>
+      </section>
+      <section className="mx-auto max-w-7xl px-6 pb-16">
+        <div className="mb-6">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#009ee9]">
+            Harmonogram
+          </p>
+
+          <h2 className="mt-2 text-3xl font-bold text-[#071b55]">Lekcie</h2>
+
+          <p className="mt-2 text-slate-600">
+            Prehľad konkrétnych lekcií a očakávaného počtu detí.
+          </p>
+        </div>
+
+        {upcomingLessons.length === 0 ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <p className="text-slate-600">
+              Zatiaľ nie sú vytvorené žiadne lekcie.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {upcomingLessons.map((lesson) => (
+              <article
+                key={lesson.id}
+                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-[#009ee9]">
+                      {dayLabels[lesson.dayOfWeek] ?? "—"}
+                    </p>
+
+                    <h3 className="mt-1 text-xl font-bold text-[#071b55]">
+                      {formatDate(lesson.lessonDate)}
+                    </h3>
+
+                    <p className="mt-1 font-semibold text-slate-700">
+                      {lesson.startTime.slice(0, 5)} –{" "}
+                      {lesson.endTime.slice(0, 5)}
+                    </p>
+                  </div>
+
+                  {lesson.status === "cancelled" && (
+                    <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                      Zrušená
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-5 border-t border-slate-100 pt-4">
+                  <p className="font-semibold text-slate-900">
+                    {lesson.courseTitle}
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    {lesson.locationName}
+                  </p>
+                </div>
+
+                <div className="mt-5 grid grid-cols-3 gap-2">
+                  <div className="rounded-2xl bg-sky-50 p-3 text-center">
+                    <p className="text-xl font-bold text-[#071b55]">
+                      {lesson.registeredCount}
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-600">Prihlásených</p>
+                  </div>
+
+                  <div className="rounded-2xl bg-orange-50 p-3 text-center">
+                    <p className="text-xl font-bold text-orange-700">
+                      {lesson.absentCount}
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-600">Odhlásených</p>
+                  </div>
+
+                  <div className="rounded-2xl bg-emerald-50 p-3 text-center">
+                    <p className="text-xl font-bold text-emerald-700">
+                      {lesson.expectedCount}
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-600">Očakávame</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
