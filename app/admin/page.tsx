@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminRegistrations } from "@/lib/data/admin";
 import { getAdminLessons } from "@/lib/data/admin-lessons";
+import Link from "next/link";
 
 import { confirmRegistration, cancelRegistration } from "./actions";
 
@@ -323,16 +324,23 @@ export default async function AdminPage() {
         </div>
       </section>
       <section className="mx-auto max-w-7xl px-6 pb-16">
-        <div className="mb-6">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#009ee9]">
-            Harmonogram
-          </p>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#009ee9]">
+              Harmonogram
+            </p>
 
-          <h2 className="mt-2 text-3xl font-bold text-[#071b55]">Lekcie</h2>
+            <h2 className="mt-2 text-2xl font-bold text-[#071b55]">
+              Najbližšie lekcie
+            </h2>
+          </div>
 
-          <p className="mt-2 text-slate-600">
-            Prehľad konkrétnych lekcií a očakávaného počtu detí.
-          </p>
+          <Link
+            href="/admin/lekcie"
+            className="inline-flex w-fit rounded-full bg-[#071b55] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            Zobraziť všetky lekcie
+          </Link>
         </div>
 
         {upcomingLessons.length === 0 ? (
