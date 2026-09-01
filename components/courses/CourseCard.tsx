@@ -70,13 +70,6 @@ export default function CourseCard({ course }: CourseCardProps) {
             </span>
           </div>
 
-          <div className="flex justify-between gap-4">
-            <span className="text-slate-500">Počet lekcií</span>
-            <span className="font-medium text-slate-900">
-              {course.numberOfLessons}
-            </span>
-          </div>
-
           <div className="border-t border-slate-100 pt-3">
             <div className="flex items-center justify-between gap-4">
               <span className="text-slate-500">1× týždenne</span>
