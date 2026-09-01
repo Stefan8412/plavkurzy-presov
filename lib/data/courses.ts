@@ -38,6 +38,10 @@ type CourseTermRow = {
     | {
         name: string;
         address: string | null;
+      }
+    | {
+        name: string;
+        address: string | null;
       }[]
     | null;
 
@@ -198,12 +202,16 @@ function mapCourse(course: CourseRow): Course {
 
     ageMax: course.age_max ?? undefined,
 
-    location: {
-      name:
-        course.course_terms?.[0]?.locations?.[0]?.name ?? "Neznáma lokalita",
+    location: (() => {
+      const locations = course.course_terms?.[0]?.locations;
 
-      address: course.course_terms?.[0]?.locations?.[0]?.address ?? undefined,
-    },
+      const location = Array.isArray(locations) ? locations[0] : locations;
+
+      return {
+        name: location?.name ?? "Neznáma lokalita",
+        address: location?.address ?? undefined,
+      };
+    })(),
 
     price: course.price,
 
