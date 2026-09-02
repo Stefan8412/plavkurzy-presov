@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminRegistrations } from "@/lib/data/admin";
 import { getAdminLessons } from "@/lib/data/admin-lessons";
 import Link from "next/link";
+import { getAdminPayments } from "@/lib/data/admin-payments";
 
 import { confirmRegistration, cancelRegistration } from "./actions";
 
@@ -55,10 +56,14 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const [registrations, lessons] = await Promise.all([
+  const [registrations, lessons, payments] = await Promise.all([
     getAdminRegistrations(),
     getAdminLessons(),
+    getAdminPayments(),
   ]);
+  const paymentByRegistrationGroup = new Map(
+    payments.map((payment) => [payment.registrationGroupId, payment]),
+  );
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -171,7 +176,9 @@ export default async function AdminPage() {
                     <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
                       Cena
                     </th>
-
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Platba
+                    </th>
                     <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
                       Stav
                     </th>
@@ -256,6 +263,59 @@ export default async function AdminPage() {
                             ? `${registration.totalPrice} €`
                             : "—"}
                         </p>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        {(() => {
+                          const payment = paymentByRegistrationGroup.get(
+                            registration.registrationGroupId,
+                          );
+
+                          if (!payment) {
+                            return (
+                              <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                                Nezaplatené
+                              </span>
+                            );
+                          }
+
+                          if (payment.status === "paid") {
+                            return (
+                              <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                Zaplatené
+                              </span>
+                            );
+                          }
+
+                          if (payment.status === "pending") {
+                            return (
+                              <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                                Čaká na platbu
+                              </span>
+                            );
+                          }
+
+                          if (payment.status === "failed") {
+                            return (
+                              <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                                Platba zlyhala
+                              </span>
+                            );
+                          }
+
+                          if (payment.status === "refunded") {
+                            return (
+                              <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                                Vrátená
+                              </span>
+                            );
+                          }
+
+                          return (
+                            <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                              Zrušená
+                            </span>
+                          );
+                        })()}
                       </td>
 
                       <td className="whitespace-nowrap px-6 py-5">

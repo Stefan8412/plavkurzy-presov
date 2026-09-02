@@ -69,7 +69,7 @@ export default async function MyCoursesPage() {
                   className="rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:p-6"
                 >
                   <div className="rounded-2xl bg-white p-5 shadow-sm">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <p className="text-sm font-medium text-slate-500">
                           Dieťa
@@ -94,7 +94,9 @@ export default async function MyCoursesPage() {
                       </div>
 
                       <div className="sm:text-right">
-                        <p className="text-sm text-slate-500">Cena</p>
+                        <p className="text-sm text-slate-500">
+                          Členský príspevok
+                        </p>
 
                         <p className="mt-1 text-xl font-bold text-slate-950">
                           {registration.totalPrice} €
@@ -115,6 +117,59 @@ export default async function MyCoursesPage() {
                             </span>
                           )}
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 border-t border-slate-100 pt-5">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-500">
+                            Platba
+                          </p>
+
+                          <div className="mt-2">
+                            {!registration.payment ? (
+                              <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                                Nezaplatené
+                              </span>
+                            ) : registration.payment.status === "paid" ? (
+                              <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                Zaplatené
+                              </span>
+                            ) : registration.payment.status === "pending" ? (
+                              <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                                Čaká na platbu
+                              </span>
+                            ) : registration.payment.status === "failed" ? (
+                              <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                                Platba zlyhala
+                              </span>
+                            ) : registration.payment.status === "refunded" ? (
+                              <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                                Platba vrátená
+                              </span>
+                            ) : (
+                              <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                                Platba zrušená
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {registration.payment && (
+                          <div className="sm:text-right">
+                            <p className="text-sm text-slate-500">
+                              Suma na úhradu
+                            </p>
+
+                            <p className="mt-1 text-lg font-bold text-[#071b55]">
+                              {registration.payment.amount}{" "}
+                              {registration.payment.currency === "EUR"
+                                ? "€"
+                                : registration.payment.currency}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
