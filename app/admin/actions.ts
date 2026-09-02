@@ -12,79 +12,84 @@ async function requireAdmin() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Musíte byť prihlásený.");
   }
 
-  const { data: profile, error } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (error || profile?.role !== "admin") {
-    throw new Error("Forbidden");
+  if (profileError || profile?.role !== "admin") {
+    throw new Error("Nemáte oprávnenie vykonať túto akciu.");
   }
 
   return supabase;
 }
 
-async function getRegistrationGroupId(registrationId: string) {
+export async function confirmRegistration(registrationId: string) {
   const supabase = await requireAdmin();
 
-  const { data: registration, error } = await supabase
+  const { data: registration, error: registrationError } = await supabase
     .from("registrations")
-    .select("registration_group_id")
+    .select("id, registration_group_id")
     .eq("id", registrationId)
     .single();
 
-  if (error || !registration?.registration_group_id) {
+  if (registrationError || !registration) {
     throw new Error("Registrácia sa nenašla.");
   }
 
-  return {
-    supabase,
-    registrationGroupId: registration.registration_group_id,
-  };
-}
-
-export async function confirmRegistration(registrationId: string) {
-  const { supabase, registrationGroupId } =
-    await getRegistrationGroupId(registrationId);
-
-  const { error } = await supabase
+  const { error: updateError } = await supabase
     .from("registrations")
     .update({
       status: "confirmed",
       updated_at: new Date().toISOString(),
     })
-    .eq("registration_group_id", registrationGroupId);
+    .eq("registration_group_id", registration.registration_group_id);
 
-  if (error) {
-    console.error("Failed to confirm registration:", error);
+  if (updateError) {
+    console.error("Chyba pri potvrdení registrácie:", updateError);
+
     throw new Error("Registráciu sa nepodarilo potvrdiť.");
   }
 
   revalidatePath("/admin");
   revalidatePath("/prihlasenie");
+  revalidatePath("/moje-kurzy");
+  revalidatePath("/kurzy");
 }
 
 export async function cancelRegistration(registrationId: string) {
-  const { supabase, registrationGroupId } =
-    await getRegistrationGroupId(registrationId);
+  const supabase = await requireAdmin();
 
-  const { error } = await supabase
+  const { data: registration, error: registrationError } = await supabase
+    .from("registrations")
+    .select("id, registration_group_id")
+    .eq("id", registrationId)
+    .single();
+
+  if (registrationError || !registration) {
+    throw new Error("Registrácia sa nenašla.");
+  }
+
+  const { error: updateError } = await supabase
     .from("registrations")
     .update({
       status: "cancelled",
       updated_at: new Date().toISOString(),
     })
-    .eq("registration_group_id", registrationGroupId);
+    .eq("registration_group_id", registration.registration_group_id);
 
-  if (error) {
-    console.error("Failed to cancel registration:", error);
+  if (updateError) {
+    console.error("Chyba pri zrušení registrácie:", updateError);
+
     throw new Error("Registráciu sa nepodarilo zrušiť.");
   }
 
   revalidatePath("/admin");
   revalidatePath("/prihlasenie");
+  revalidatePath("/moje-kurzy");
+  revalidatePath("/kurzy");
 }

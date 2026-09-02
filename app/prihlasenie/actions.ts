@@ -189,6 +189,7 @@ export async function createLessonAbsence(formData: FormData) {
   }
 
   revalidatePath("/prihlasenie");
+  revalidatePath("/moje-kurzy");
 }
 
 export async function cancelLessonAbsence(formData: FormData) {
@@ -235,4 +236,5 @@ export async function cancelLessonAbsence(formData: FormData) {
   }
 
   revalidatePath("/prihlasenie");
+  revalidatePath("/moje-kurzy");
 }
