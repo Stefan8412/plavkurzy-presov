@@ -85,11 +85,21 @@ export async function updateCourseTerm(formData: FormData) {
     );
   }
 
+  let finalStatus: "available" | "full" | "closed";
+
+  if (statusValue === "closed") {
+    finalStatus = "closed";
+  } else if (capacity <= activeRegistrations) {
+    finalStatus = "full";
+  } else {
+    finalStatus = "available";
+  }
+
   const { data: updatedTerm, error: updateError } = await supabase
     .from("course_terms")
     .update({
       capacity,
-      status: statusValue,
+      status: finalStatus,
       updated_at: new Date().toISOString(),
     })
     .eq("id", termId)

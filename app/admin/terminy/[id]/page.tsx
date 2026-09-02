@@ -194,15 +194,19 @@ export default async function AdminCourseTermDetailPage({ params }: PageProps) {
                 <select
                   id="status"
                   name="status"
-                  defaultValue={term.status}
+                  defaultValue={
+                    term.status === "closed" ? "closed" : "available"
+                  }
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-[#009ee9] focus:ring-2 focus:ring-sky-100"
                 >
                   <option value="available">Dostupný</option>
-
-                  <option value="full">Plný</option>
-
                   <option value="closed">Zatvorený</option>
                 </select>
+
+                <p className="mt-2 text-xs text-slate-500">
+                  Stav „Plný“ sa nastavuje automaticky podľa kapacity a počtu
+                  prihlásených.
+                </p>
               </div>
 
               <button
