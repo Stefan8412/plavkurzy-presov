@@ -75,6 +75,14 @@ export default function Footer() {
               >
                 plavaniepo@gmail.com
               </a>
+              <a
+                href="https://www.facebook.com/plavaniepresov"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sky-100/75 transition hover:text-white"
+              >
+                Facebook – Plavecká škola FEDDY
+              </a>
 
               <Link
                 href="/kontakt"
