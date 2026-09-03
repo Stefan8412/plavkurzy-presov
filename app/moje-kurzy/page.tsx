@@ -8,7 +8,17 @@ import { getLessonsForChildRegistration } from "@/lib/data/lessons";
 
 import LessonsList from "@/app/prihlasenie/LessonsList";
 
-export default async function MyCoursesPage() {
+type MyCoursesPageProps = {
+  searchParams: Promise<{
+    payment?: string;
+  }>;
+};
+
+export default async function MyCoursesPage({
+  searchParams,
+}: MyCoursesPageProps) {
+  const params = await searchParams;
+  const paymentResult = params.payment;
   const supabase = await createClient();
 
   const {
@@ -31,6 +41,25 @@ export default async function MyCoursesPage() {
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-[#071b55]">
           Moje kurzy
         </h1>
+        {paymentResult === "paid" && (
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
+            Platba bola úspešne dokončená. Stav platby ešte overujeme cez
+            Comgate.
+          </div>
+        )}
+
+        {paymentResult === "cancelled" && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-800">
+            Platba bola zrušená. Registrácia zostáva nezaplatená.
+          </div>
+        )}
+
+        {paymentResult === "pending" && (
+          <div className="mb-6 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-4 text-sm font-medium text-sky-800">
+            Platba ešte nebola dokončená. Jej stav overíme po spracovaní
+            Comgate.
+          </div>
+        )}
 
         <p className="mt-3 max-w-2xl text-slate-600">
           Tu nájdete aktívne kurzy vašich detí a všetky plánované lekcie.
