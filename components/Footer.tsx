@@ -105,6 +105,20 @@ export default function Footer() {
             </Link>
           </div>
         </div>
+        {/* Payments */}
+        <div className="mt-12 border-t border-white/10 pt-8">
+          <p className="mb-4 text-sm font-semibold text-sky-100/70">
+            Bezpečné platby cez Comgate
+          </p>
+
+          <Image
+            src="/images/comgate-payments.png"
+            alt="Comgate – Visa, Mastercard, Google Pay a Apple Pay"
+            width={2000}
+            height={185}
+            className="h-auto w-full max-w-[520px]"
+          />
+        </div>
 
         {/* Bottom */}
         <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-sky-100/55 sm:flex-row sm:items-center sm:justify-between">
