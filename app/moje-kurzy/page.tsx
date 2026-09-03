@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { payRegistration } from "./actions";
 
 import { createClient } from "@/lib/supabase/server";
 import { getMyCourseRegistrations } from "@/lib/data/my-courses";
@@ -154,6 +155,24 @@ export default async function MyCoursesPage() {
                               </span>
                             )}
                           </div>
+                          {registration.payment?.status === "pending" &&
+                            (registration.status === "pending" ||
+                              registration.status === "confirmed") && (
+                              <form
+                                action={payRegistration.bind(
+                                  null,
+                                  registration.registrationGroupId,
+                                )}
+                                className="mt-4"
+                              >
+                                <button
+                                  type="submit"
+                                  className="inline-flex w-full items-center justify-center rounded-full bg-[#009ee9] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0087c9] sm:w-auto"
+                                >
+                                  Zaplatiť cez Comgate
+                                </button>
+                              </form>
+                            )}
                         </div>
 
                         {registration.payment && (
