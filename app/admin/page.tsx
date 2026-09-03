@@ -395,12 +395,21 @@ export default async function AdminPage() {
             </h2>
           </div>
 
-          <Link
-            href="/admin/lekcie"
-            className="inline-flex w-fit rounded-full bg-[#071b55] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            Zobraziť všetky lekcie
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin/terminy"
+              className="inline-flex w-fit rounded-full border border-[#071b55] bg-white px-5 py-3 text-sm font-semibold text-[#071b55] transition hover:bg-slate-50"
+            >
+              Správa termínov
+            </Link>
+
+            <Link
+              href="/admin/lekcie"
+              className="inline-flex w-fit rounded-full bg-[#071b55] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Zobraziť všetky lekcie
+            </Link>
+          </div>
         </div>
 
         {upcomingLessons.length === 0 ? (
