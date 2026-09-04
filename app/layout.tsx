@@ -15,8 +15,41 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Plavecká škola Prešov",
-  description: "Kurzy plávania pre deti a dospelých v Prešove.",
+  metadataBase: new URL("https://www.plavaniepresov.sk"),
+
+  title: {
+    default: "Plavecká škola FEDDY | Prešov",
+    template: "%s | Plavecká škola FEDDY",
+  },
+
+  description:
+    "Kurzy plávania pre deti v Prešove. Plavecká škola FEDDY – skupinové a kondičné plávanie v Aquaparku Delňa.",
+
+  openGraph: {
+    type: "website",
+    locale: "sk_SK",
+    url: "https://www.plavaniepresov.sk",
+    siteName: "Plavecká škola FEDDY",
+    title: "Plavecká škola FEDDY | Prešov",
+    description:
+      "Kurzy plávania pre deti v Prešove. Skupinové a kondičné plávanie v Aquaparku Delňa.",
+    images: [
+      {
+        url: "/images/og-feddy.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Plavecká škola FEDDY – kurzy plávania v Prešove",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Plavecká škola FEDDY | Prešov",
+    description:
+      "Kurzy plávania pre deti v Prešove. Skupinové a kondičné plávanie v Aquaparku Delňa.",
+    images: ["/images/og-feddy.jpg"],
+  },
 };
 
 export default function RootLayout({

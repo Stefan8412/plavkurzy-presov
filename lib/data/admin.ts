@@ -19,6 +19,7 @@ export type AdminRegistration = {
   child: {
     firstName: string;
     lastName: string;
+    notes: string | null;
   };
 
   parent: {
@@ -116,6 +117,7 @@ export async function getAdminRegistrations(): Promise<AdminRegistration[]> {
       children!registrations_child_id_fkey (
         first_name,
         last_name,
+        notes,
 
         profiles!children_parent_id_fkey (
           first_name,
@@ -200,6 +202,7 @@ export async function getAdminRegistrations(): Promise<AdminRegistration[]> {
       child: {
         firstName: child?.first_name ?? "",
         lastName: child?.last_name ?? "",
+        notes: child?.notes ?? null,
       },
 
       parent: {

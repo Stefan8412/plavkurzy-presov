@@ -199,11 +199,23 @@ export default async function AdminPage() {
                       key={registration.registrationGroupId}
                       className="transition hover:bg-slate-50"
                     >
-                      <td className="whitespace-nowrap px-6 py-5">
+                      <td className="px-6 py-5">
                         <p className="font-semibold text-slate-900">
                           {registration.child.firstName}{" "}
                           {registration.child.lastName}
                         </p>
+
+                        {registration.child.notes?.trim() && (
+                          <div className="mt-3 max-w-xs rounded-xl bg-amber-50 px-3 py-2">
+                            <p className="text-xs font-semibold text-amber-800">
+                              Poznámka rodiča
+                            </p>
+
+                            <p className="mt-1 whitespace-normal text-sm leading-5 text-slate-700">
+                              {registration.child.notes}
+                            </p>
+                          </div>
+                        )}
                       </td>
 
                       <td className="px-6 py-5">
