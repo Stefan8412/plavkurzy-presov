@@ -172,6 +172,7 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ mini section */}
+      {/* FAQ */}
       <section className="py-24">
         <div className="mx-auto max-w-4xl px-6">
           <div className="text-center">
@@ -182,41 +183,148 @@ export default function ContactPage() {
             <h2 className="mt-3 text-4xl font-bold tracking-tight text-[#071b55]">
               Pred prvou hodinou
             </h2>
+
+            <p className="mx-auto mt-4 max-w-2xl leading-7 text-slate-600">
+              Kliknite na otázku a zobrazí sa odpoveď.
+            </p>
           </div>
 
           <div className="mt-10 space-y-4">
-            <div className="rounded-3xl border border-slate-200 p-6">
-              <h3 className="font-bold text-[#071b55]">
-                Neviem, do ktorej skupiny dieťa patrí.
-              </h3>
+            <details className="group rounded-3xl border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 font-bold text-[#071b55]">
+                <span>Od koľkých rokov môže dieťa začať?</span>
+                <span className="text-2xl font-light text-[#009ee9] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
 
-              <p className="mt-2 leading-7 text-slate-600">
-                Kontaktujte nás. Podľa veku a doterajších skúseností s vodou vám
-                odporučíme vhodnú skupinu.
-              </p>
-            </div>
+              <div className="border-t border-slate-100 px-6 pb-6 pt-4">
+                <p className="leading-7 text-slate-600">
+                  Skupinové kurzy začíname od 3 rokov. Najmenšie deti majú
+                  vlastný kurz zameraný na zoznámenie s vodou, kde ide
+                  predovšetkým o to, aby sa dieťa vo vode cítilo bezpečne a
+                  získalo k nej pozitívny vzťah.
+                </p>
+              </div>
+            </details>
 
-            <div className="rounded-3xl border border-slate-200 p-6">
-              <h3 className="font-bold text-[#071b55]">
-                Ako sa môžem prihlásiť?
-              </h3>
+            <details className="group rounded-3xl border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 font-bold text-[#071b55]">
+                <span>Čo ak sa moje dieťa vody bojí?</span>
+                <span className="text-2xl font-light text-[#009ee9] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
 
-              <p className="mt-2 leading-7 text-slate-600">
-                Na stránke Kurzy si vyberiete kurz, konkrétny termín a následne
-                prihlásite dieťa cez svoj účet.
-              </p>
-            </div>
+              <div className="border-t border-slate-100 px-6 pb-6 pt-4">
+                <p className="leading-7 text-slate-600">
+                  To je úplne bežné a nie je to prekážka. Postupujeme citlivo a
+                  rešpektujeme tempo každého dieťaťa – od zvykania si na vodu
+                  cez ponáranie až po prvé samostatné metre. Traja naši tréneri
+                  majú navyše špecializáciu na výučbu plávania detí so
+                  zdravotným znevýhodnením.
+                </p>
+              </div>
+            </details>
 
-            <div className="rounded-3xl border border-slate-200 p-6">
-              <h3 className="font-bold text-[#071b55]">
-                Ponúkate aj individuálne hodiny?
-              </h3>
+            <details className="group rounded-3xl border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 font-bold text-[#071b55]">
+                <span>Ako rozdeľujete deti do skupín?</span>
+                <span className="text-2xl font-light text-[#009ee9] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
 
-              <p className="mt-2 leading-7 text-slate-600">
-                Áno. Individuálne hodiny je možné dohodnúť podľa dostupnosti
-                trénera a bazéna.
-              </p>
-            </div>
+              <div className="border-t border-slate-100 px-6 pb-6 pt-4">
+                <p className="leading-7 text-slate-600">
+                  Deti rozdeľujeme podľa ich skutočnej plaveckej úrovne, nielen
+                  podľa veku. Kurz pre deti od 4 do 10 rokov je určený úplným
+                  začiatočníkom aj deťom, ktoré už vo vode zvládajú základné
+                  plavecké prvky.
+                </p>
+              </div>
+            </details>
+
+            <details className="group rounded-3xl border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 font-bold text-[#071b55]">
+                <span>Čo si má dieťa priniesť na lekciu?</span>
+                <span className="text-2xl font-light text-[#009ee9] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+
+              <div className="border-t border-slate-100 px-6 pb-6 pt-4">
+                <p className="leading-7 text-slate-600">
+                  Plavky (u chlapcov nie sú vhodné bermudy), šľapky k bazénu,
+                  uterák a plavecké okuliare. Plavecká čiapka nie je povinná.
+                </p>
+              </div>
+            </details>
+
+            <details className="group rounded-3xl border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 font-bold text-[#071b55]">
+                <span>Ako dlho trvá jedna lekcia?</span>
+                <span className="text-2xl font-light text-[#009ee9] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+
+              <div className="border-t border-slate-100 px-6 pb-6 pt-4">
+                <p className="leading-7 text-slate-600">
+                  Samotný program v bazéne tvorí 45 minút výučby a približne 5
+                  minút hier vo vode. Pred vstupom do bazéna počítajte ešte s
+                  5–10 minútami rozcvičky a následne so sprchou.
+                </p>
+              </div>
+            </details>
+
+            <details className="group rounded-3xl border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 font-bold text-[#071b55]">
+                <span>Neviem, do ktorej skupiny dieťa patrí.</span>
+                <span className="text-2xl font-light text-[#009ee9] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+
+              <div className="border-t border-slate-100 px-6 pb-6 pt-4">
+                <p className="leading-7 text-slate-600">
+                  Kontaktujte nás. Podľa veku a doterajších skúseností s vodou
+                  vám odporučíme vhodnú skupinu.
+                </p>
+              </div>
+            </details>
+
+            <details className="group rounded-3xl border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 font-bold text-[#071b55]">
+                <span>Ako sa môžem prihlásiť?</span>
+                <span className="text-2xl font-light text-[#009ee9] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+
+              <div className="border-t border-slate-100 px-6 pb-6 pt-4">
+                <p className="leading-7 text-slate-600">
+                  Na stránke Kurzy si vyberiete kurz, konkrétny termín a
+                  následne prihlásite dieťa cez svoj účet.
+                </p>
+              </div>
+            </details>
+
+            <details className="group rounded-3xl border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 font-bold text-[#071b55]">
+                <span>Ponúkate aj individuálne hodiny?</span>
+                <span className="text-2xl font-light text-[#009ee9] transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+
+              <div className="border-t border-slate-100 px-6 pb-6 pt-4">
+                <p className="leading-7 text-slate-600">
+                  Áno. Individuálne hodiny je možné dohodnúť podľa dostupnosti
+                  trénera a bazéna.
+                </p>
+              </div>
+            </details>
           </div>
         </div>
       </section>

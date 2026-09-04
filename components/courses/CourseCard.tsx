@@ -11,17 +11,23 @@ const levelLabels = {
   intermediate: "Mierne pokročilý",
   advanced: "Pokročilý",
 };
+const courseImages: Record<string, string> = {
+  "plavanie-deti-3-4-roky": "/images/kurz-3-4.jpg",
+  "plavanie-deti-4-10-rokov": "/images/kurz-4-10.jpg",
+  "kondicne-plavanie-10-plus": "/images/kurz-10-plus.jpg",
+};
 
 export default function CourseCard({ course }: CourseCardProps) {
+  const courseImage = courseImages[course.slug] ?? "/images/logo-feddy1.png";
   return (
     <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-lg">
-      <div className="flex aspect-[16/10] items-center justify-center bg-sky-50 p-8">
+      <div className="relative aspect-[16/10] overflow-hidden bg-sky-50">
         <Image
-          src="/images/logo-feddy1.png"
-          alt="FEDDY Plavecká škola"
-          width={320}
-          height={220}
-          className="h-full w-full object-contain"
+          src={courseImage}
+          alt={course.title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover"
         />
       </div>
 
