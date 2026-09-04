@@ -70,13 +70,22 @@ export default function MobileMenu({
             ))}
 
             {isLoggedIn && (
-              <Link
-                href="/moje-kurzy"
-                onClick={() => setIsOpen(false)}
-                className="border-b border-slate-100 py-4 text-base font-semibold text-[#071b55]"
-              >
-                Moje kurzy
-              </Link>
+              <>
+                <Link
+                  href="/moje-kurzy"
+                  onClick={() => setIsOpen(false)}
+                  className="border-b border-slate-100 py-4 text-base font-semibold text-[#071b55]"
+                >
+                  Moje kurzy
+                </Link>
+                <Link
+                  href="/ucet"
+                  onClick={() => setIsOpen(false)}
+                  className="border-b border-slate-100 py-4 text-base font-semibold text-[#071b55]"
+                >
+                  Môj účet
+                </Link>
+              </>
             )}
 
             {isAdmin && (
