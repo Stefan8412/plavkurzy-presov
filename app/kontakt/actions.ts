@@ -51,7 +51,7 @@ export async function sendContactMessage(
   try {
     const { error } = await resend.emails.send({
       from: "FEDDY web <onboarding@resend.dev>",
-      to: ["stefan@hancar.sk"],
+      to: ["plavaniepo@gmail.com"],
       replyTo: email,
       subject: `Kontaktný formulár: ${selectedSubject}`,
       text: `

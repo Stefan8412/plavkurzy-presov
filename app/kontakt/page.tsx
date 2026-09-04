@@ -122,9 +122,7 @@ export default function ContactPage() {
             </h2>
 
             <p className="mt-3 text-slate-600">
-              Napíšte nám správu a ozveme sa vám čo najskôr. Formular bude
-              posielat emaily na plavaniepo@gmail.com az po overeni domeny,
-              zatial emaily odosiela na stefan@hancar.sk.
+              Napíšte nám správu a ozveme sa vám čo najskôr.
             </p>
 
             <ContactForm />
