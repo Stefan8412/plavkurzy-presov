@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type AdminRegistrationTerm = {
   id: string;
@@ -23,9 +24,11 @@ export type AdminRegistration = {
   };
 
   parent: {
+    id: string;
     firstName: string;
     lastName: string;
     phone: string | null;
+    email: string | null;
   };
 
   course: {
@@ -115,16 +118,17 @@ export async function getAdminRegistrations(): Promise<AdminRegistration[]> {
       total_price,
 
       children!registrations_child_id_fkey (
-        first_name,
-        last_name,
-        notes,
+  first_name,
+  last_name,
+  notes,
+  parent_id,
 
-        profiles!children_parent_id_fkey (
-          first_name,
-          last_name,
-          phone
-        )
-      ),
+  profiles!children_parent_id_fkey (
+    first_name,
+    last_name,
+    phone
+  )
+),
 
       course_terms!registrations_course_term_id_fkey (
         id,
@@ -206,9 +210,11 @@ export async function getAdminRegistrations(): Promise<AdminRegistration[]> {
       },
 
       parent: {
+        id: child?.parent_id ?? "",
         firstName: parent?.first_name ?? "",
         lastName: parent?.last_name ?? "",
         phone: parent?.phone ?? null,
+        email: null,
       },
 
       course: {
@@ -243,6 +249,38 @@ export async function getAdminRegistrations(): Promise<AdminRegistration[]> {
       };
     },
   );
+  const adminSupabase = createAdminClient();
+
+  const uniqueParentIds = [
+    ...new Set(
+      registrations
+        .map((registration) => registration.parent.id)
+        .filter(Boolean),
+    ),
+  ];
+
+  const emailByParentId = new Map<string, string>();
+
+  await Promise.all(
+    uniqueParentIds.map(async (parentId) => {
+      const { data, error } =
+        await adminSupabase.auth.admin.getUserById(parentId);
+
+      if (error) {
+        console.error(`Failed to load email for parent ${parentId}:`, error);
+        return;
+      }
+
+      if (data.user?.email) {
+        emailByParentId.set(parentId, data.user.email);
+      }
+    }),
+  );
+
+  for (const registration of registrations) {
+    registration.parent.email =
+      emailByParentId.get(registration.parent.id) ?? null;
+  }
 
   return registrations;
 }

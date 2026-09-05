@@ -232,6 +232,14 @@ export default async function AdminPage() {
                             {registration.parent.phone}
                           </a>
                         )}
+                        {registration.parent.email && (
+                          <a
+                            href={`mailto:${registration.parent.email}`}
+                            className="mt-1 block text-sm text-[#009ee9] hover:underline"
+                          >
+                            {registration.parent.email}
+                          </a>
+                        )}
                       </td>
 
                       <td className="px-6 py-5">
