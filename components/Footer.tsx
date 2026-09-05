@@ -127,6 +127,54 @@ export default function Footer() {
             className="h-auto w-full max-w-[520px]"
           />
         </div>
+        {/* Partners */}
+        <div className="mt-12 border-t border-white/10 pt-8">
+          <p className="mb-8 text-sm font-semibold uppercase tracking-[0.18em] text-[#38bdf8]">
+            Naši partneri
+          </p>
+
+          <div className="grid grid-cols-2 items-center gap-x-8 gap-y-8 sm:grid-cols-4">
+            <div className="flex items-center justify-center">
+              <Image
+                src="/images/partner-1.png"
+                alt="Partner 1"
+                width={220}
+                height={100}
+                className="max-h-16 w-auto max-w-full object-contain"
+              />
+            </div>
+
+            <div className="flex items-center justify-center">
+              <Image
+                src="/images/partner-2.png"
+                alt="Partner 2"
+                width={220}
+                height={100}
+                className="max-h-16 w-auto max-w-full object-contain"
+              />
+            </div>
+
+            <div className="flex items-center justify-center">
+              <Image
+                src="/images/partner-3.png"
+                alt="Partner 3"
+                width={220}
+                height={100}
+                className="max-h-16 w-auto max-w-full object-contain"
+              />
+            </div>
+
+            <div className="flex items-center justify-center">
+              <Image
+                src="/images/partner-4.png"
+                alt="Partner 4"
+                width={220}
+                height={100}
+                className="max-h-16 w-auto max-w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Bottom */}
         <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-sky-100/55 sm:flex-row sm:items-center sm:justify-between">
