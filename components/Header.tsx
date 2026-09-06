@@ -92,11 +92,13 @@ export default async function Header() {
 
         <div className="flex items-center gap-3">
           {user ? (
-            <LogoutButton />
+            <div className="hidden lg:block">
+              <LogoutButton />
+            </div>
           ) : (
             <Link
               href="/prihlasenie"
-              className="hidden text-sm font-semibold text-[#071b55] transition-colors hover:text-[#009ee9] sm:block"
+              className="hidden text-sm font-semibold text-[#071b55] transition-colors hover:text-[#009ee9] lg:block"
             >
               Prihlásiť sa
             </Link>

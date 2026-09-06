@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import LogoutButton from "./LogoutButton";
 
 type MobileMenuProps = {
   isAdmin?: boolean;
@@ -85,6 +86,9 @@ export default function MobileMenu({
                 >
                   Môj účet
                 </Link>
+                <div className="border-b border-slate-100 py-4">
+                  <LogoutButton />
+                </div>
               </>
             )}
 

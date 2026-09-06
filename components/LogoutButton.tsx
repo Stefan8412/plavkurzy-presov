@@ -30,7 +30,7 @@ export default function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={loading}
-      className="hidden text-sm font-semibold text-[#071b55] transition-colors hover:text-[#009ee9] disabled:opacity-50 sm:block"
+      className="text-sm font-semibold text-[#071b55] transition-colors hover:text-[#009ee9] disabled:opacity-50"
     >
       {loading ? "Odhlasujem..." : "Odhlásiť sa"}
     </button>
