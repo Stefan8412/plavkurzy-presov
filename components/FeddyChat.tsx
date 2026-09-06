@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 
 type Question = {
   question: string;
@@ -200,6 +201,16 @@ export default function FeddyChat() {
   );
   const [customQuestion, setCustomQuestion] = useState("");
   const [unknownQuestion, setUnknownQuestion] = useState<string | null>(null);
+  const answerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedQuestion || unknownQuestion) {
+      answerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [selectedQuestion, unknownQuestion]);
 
   function closeChat() {
     setOpen(false);
@@ -296,7 +307,7 @@ export default function FeddyChat() {
 
             {/* Known answer */}
             {selectedQuestion && (
-              <div className="mt-5">
+              <div ref={answerRef} className="mt-5">
                 <div className="ml-auto max-w-[90%] rounded-2xl rounded-tr-md bg-[#009ee9] px-4 py-3 text-sm font-medium leading-6 text-white">
                   {selectedQuestion.question}
                 </div>
