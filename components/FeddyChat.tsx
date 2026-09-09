@@ -38,15 +38,16 @@ const questions: Question[] = [
     answer:
       "Pre deti vo veku 3–4 roky máme samostatný kurz. Pre deti od 4 do 10 rokov je určené skupinové plávanie a pre deti od 10 rokov kondičné plávanie. Nevadí, ak je dieťa neplavec – pri registrácii nám môžete do poznámky napísať jeho skúsenosti s vodou.",
     keywords: [
-      "kurz",
-      "vek",
-      "roky",
-      "rokov",
-      "dieťa",
-      "dieta",
-      "dcéra",
-      "dcera",
-      "syn",
+      "ktorý kurz",
+      "ktory kurz",
+      "vhodný kurz",
+      "vhodny kurz",
+      "pre moje dieťa",
+      "pre moje dieta",
+      "aký kurz",
+      "aky kurz",
+      "kam prihlásiť",
+      "kam prihlasit",
       "neplavec",
       "nevie plávať",
       "nevie plavat",
@@ -217,16 +218,22 @@ export default function FeddyChat() {
   );
   const [customQuestion, setCustomQuestion] = useState("");
   const [unknownQuestion, setUnknownQuestion] = useState<string | null>(null);
+  const [aiAnswer, setAiAnswer] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(false);
+  const [submittedQuestion, setSubmittedQuestion] = useState<string | null>(
+    null,
+  );
   const answerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (selectedQuestion || unknownQuestion) {
+    if (selectedQuestion || unknownQuestion || aiAnswer) {
       answerRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     }
-  }, [selectedQuestion, unknownQuestion]);
+  }, [selectedQuestion, unknownQuestion, aiAnswer]);
 
   function closeChat() {
     setOpen(false);
@@ -235,28 +242,61 @@ export default function FeddyChat() {
   function selectQuestion(question: Question) {
     setSelectedQuestion(question);
     setUnknownQuestion(null);
+    setAiAnswer(null);
+    setAiError(false);
+    setSubmittedQuestion(null);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const value = customQuestion.trim();
+    setSubmittedQuestion(value);
 
-    if (!value) {
+    if (!value || aiLoading) {
       return;
     }
 
     const answer = findAnswer(value);
 
+    setCustomQuestion("");
+    setAiAnswer(null);
+    setAiError(false);
+
     if (answer) {
       setSelectedQuestion(answer);
       setUnknownQuestion(null);
-    } else {
-      setSelectedQuestion(null);
-      setUnknownQuestion(value);
+      return;
     }
 
-    setCustomQuestion("");
+    setSelectedQuestion(null);
+    setUnknownQuestion(value);
+    setAiLoading(true);
+
+    try {
+      const response = await fetch("/api/feddy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: value,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.answer) {
+        throw new Error("AI odpoveď sa nepodarila.");
+      }
+
+      setAiAnswer(data.answer);
+    } catch (error) {
+      console.error("Feddy AI error:", error);
+      setAiError(true);
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   return (
@@ -314,9 +354,10 @@ export default function FeddyChat() {
 
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#009ee9] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#0087c9]"
+                  disabled={aiLoading}
+                  className="rounded-xl bg-[#009ee9] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#0087c9] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Odoslať
+                  {aiLoading ? "Čakajte..." : "Odoslať"}
                 </button>
               </div>
             </form>
@@ -325,7 +366,7 @@ export default function FeddyChat() {
             {selectedQuestion && (
               <div ref={answerRef} className="mt-5">
                 <div className="ml-auto max-w-[90%] rounded-2xl rounded-tr-md bg-[#009ee9] px-4 py-3 text-sm font-medium leading-6 text-white">
-                  {selectedQuestion.question}
+                  {submittedQuestion ?? selectedQuestion.question}
                 </div>
 
                 <div className="mt-3 max-w-[90%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
@@ -344,32 +385,50 @@ export default function FeddyChat() {
               </div>
             )}
 
-            {/* Unknown answer */}
+            {/* Unknown / AI answer */}
             {unknownQuestion && (
-              <div className="mt-5">
+              <div ref={answerRef} className="mt-5">
                 <div className="ml-auto max-w-[90%] rounded-2xl rounded-tr-md bg-[#009ee9] px-4 py-3 text-sm font-medium leading-6 text-white">
                   {unknownQuestion}
                 </div>
 
-                <div className="mt-3 max-w-[90%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
-                  Túto otázku zatiaľ neviem spoľahlivo zodpovedať. Prosím,
-                  kontaktujte nás telefonicky alebo e-mailom.
-                  <div className="mt-3 space-y-1">
-                    <a
-                      href="tel:+421902575215"
-                      className="block font-bold text-[#009ee9] hover:underline"
-                    >
-                      0902 575 215
-                    </a>
-
-                    <a
-                      href="mailto:plavaniepo@gmail.com"
-                      className="block font-bold text-[#009ee9] hover:underline"
-                    >
-                      plavaniepo@gmail.com
-                    </a>
+                {aiLoading && (
+                  <div className="mt-3 max-w-[90%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-600">
+                    FEDDY premýšľa...
                   </div>
-                </div>
+                )}
+
+                {aiAnswer && !aiLoading && (
+                  <div className="mt-3 max-w-[90%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
+                    {aiAnswer}
+                  </div>
+                )}
+
+                {aiError && !aiLoading && (
+                  <div className="mt-3 max-w-[90%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
+                    <p>
+                      Túto otázku sa mi momentálne nepodarilo spoľahlivo
+                      zodpovedať. Kontaktujte nás prosím telefonicky alebo
+                      e-mailom.
+                    </p>
+
+                    <div className="mt-3 space-y-1">
+                      <a
+                        href="tel:+421902575215"
+                        className="block font-bold text-[#009ee9] hover:underline"
+                      >
+                        0902 575 215
+                      </a>
+
+                      <a
+                        href="mailto:plavaniepo@gmail.com"
+                        className="block font-bold text-[#009ee9] hover:underline"
+                      >
+                        plavaniepo@gmail.com
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
