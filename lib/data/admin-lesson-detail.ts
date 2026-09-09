@@ -5,6 +5,7 @@ export type AdminLessonChild = {
   firstName: string;
   lastName: string;
   isAbsent: boolean;
+  isReplacement: boolean;
 };
 
 export type AdminLessonDetail = {
@@ -88,6 +89,22 @@ type AbsenceRow = {
   child_id: string;
 };
 
+type ReplacementRow = {
+  child_id: string;
+  children:
+    | {
+        id: string;
+        first_name: string;
+        last_name: string;
+      }
+    | {
+        id: string;
+        first_name: string;
+        last_name: string;
+      }[]
+    | null;
+};
+
 function first<T>(value: T | T[] | null): T | null {
   if (!value) {
     return null;
@@ -161,9 +178,17 @@ export async function getAdminLessonDetail(
     return null;
   }
 
+  /*
+   * Načítame:
+   *
+   * 1. pravidelne prihlásené deti,
+   * 2. odhlásenia z tejto lekcie,
+   * 3. deti, ktoré prišli na túto lekciu ako náhradníci.
+   */
   const [
     { data: registrationsData, error: registrationsError },
     { data: absencesData, error: absencesError },
+    { data: replacementsData, error: replacementsError },
   ] = await Promise.all([
     supabase
       .from("registrations")
@@ -184,6 +209,20 @@ export async function getAdminLessonDetail(
       .from("lesson_absences")
       .select("child_id")
       .eq("lesson_id", lesson.id),
+
+    supabase
+      .from("lesson_replacements")
+      .select(
+        `
+        child_id,
+        children!lesson_replacements_child_id_fkey (
+          id,
+          first_name,
+          last_name
+        )
+      `,
+      )
+      .eq("replacement_lesson_id", lesson.id),
   ]);
 
   if (registrationsError) {
@@ -196,13 +235,24 @@ export async function getAdminLessonDetail(
     throw new Error("Nepodarilo sa načítať odhlásenia.");
   }
 
-  const registrations = (registrationsData ?? []) as RegistrationRow[];
+  if (replacementsError) {
+    console.error(
+      "Chyba pri načítaní náhradníkov na lekcii:",
+      replacementsError,
+    );
+    throw new Error("Nepodarilo sa načítať náhradníkov.");
+  }
 
+  const registrations = (registrationsData ?? []) as RegistrationRow[];
   const absences = (absencesData ?? []) as AbsenceRow[];
+  const replacements = (replacementsData ?? []) as ReplacementRow[];
 
   const absentChildIds = new Set(absences.map((absence) => absence.child_id));
 
-  const children: AdminLessonChild[] = registrations
+  /*
+   * Pravidelne prihlásené deti.
+   */
+  const regularChildren: AdminLessonChild[] = registrations
     .map((registration) => {
       const child = first(registration.children);
 
@@ -215,15 +265,42 @@ export async function getAdminLessonDetail(
         firstName: child.first_name,
         lastName: child.last_name,
         isAbsent: absentChildIds.has(child.id),
+        isReplacement: false,
       };
     })
-    .filter((child): child is AdminLessonChild => child !== null)
-    .sort((a, b) =>
-      `${a.lastName} ${a.firstName}`.localeCompare(
-        `${b.lastName} ${b.firstName}`,
-        "sk",
-      ),
-    );
+    .filter((child): child is AdminLessonChild => child !== null);
+
+  /*
+   * Deti prihlásené na túto konkrétnu lekciu
+   * ako náhradníci.
+   */
+  const replacementChildren: AdminLessonChild[] = replacements
+    .map((replacement) => {
+      const child = first(replacement.children);
+
+      if (!child) {
+        return null;
+      }
+
+      return {
+        childId: child.id,
+        firstName: child.first_name,
+        lastName: child.last_name,
+        isAbsent: false,
+        isReplacement: true,
+      };
+    })
+    .filter((child): child is AdminLessonChild => child !== null);
+
+  /*
+   * Spojíme pravidelné deti a náhradníkov.
+   */
+  const children = [...regularChildren, ...replacementChildren].sort((a, b) =>
+    `${a.lastName} ${a.firstName}`.localeCompare(
+      `${b.lastName} ${b.firstName}`,
+      "sk",
+    ),
+  );
 
   return {
     id: lesson.id,

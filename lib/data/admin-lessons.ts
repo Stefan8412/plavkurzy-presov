@@ -15,6 +15,7 @@ export type AdminLesson = {
 
   registeredCount: number;
   absentCount: number;
+  replacementCount: number;
   expectedCount: number;
 };
 
@@ -82,6 +83,9 @@ type RegistrationRow = {
 type AbsenceRow = {
   lesson_id: string;
 };
+type ReplacementRow = {
+  replacement_lesson_id: string;
+};
 
 function first<T>(value: T | T[] | null): T | null {
   if (!value) {
@@ -116,6 +120,7 @@ export async function getAdminLessons(): Promise<AdminLesson[]> {
     { data: lessonsData, error: lessonsError },
     { data: registrationsData, error: registrationsError },
     { data: absencesData, error: absencesError },
+    { data: replacementsData, error: replacementsError },
   ] = await Promise.all([
     supabase
       .from("lessons")
@@ -146,6 +151,7 @@ export async function getAdminLessons(): Promise<AdminLesson[]> {
       .in("status", ["pending", "confirmed"]),
 
     supabase.from("lesson_absences").select("lesson_id"),
+    supabase.from("lesson_replacements").select("replacement_lesson_id"),
   ]);
 
   if (lessonsError) {
@@ -167,10 +173,19 @@ export async function getAdminLessons(): Promise<AdminLesson[]> {
 
     throw new Error("Nepodarilo sa načítať počet odhlásených.");
   }
+  if (replacementsError) {
+    console.error(
+      "Chyba pri načítaní náhradníkov pre lekcie:",
+      replacementsError,
+    );
+
+    throw new Error("Nepodarilo sa načítať počet náhradníkov.");
+  }
 
   const lessons = (lessonsData ?? []) as LessonRow[];
   const registrations = (registrationsData ?? []) as RegistrationRow[];
   const absences = (absencesData ?? []) as AbsenceRow[];
+  const replacements = (replacementsData ?? []) as ReplacementRow[];
 
   const registeredByCourseTerm = new Map<string, number>();
 
@@ -187,6 +202,14 @@ export async function getAdminLessons(): Promise<AdminLesson[]> {
     const current = absentByLesson.get(absence.lesson_id) ?? 0;
 
     absentByLesson.set(absence.lesson_id, current + 1);
+  }
+  const replacementsByLesson = new Map<string, number>();
+
+  for (const replacement of replacements) {
+    const current =
+      replacementsByLesson.get(replacement.replacement_lesson_id) ?? 0;
+
+    replacementsByLesson.set(replacement.replacement_lesson_id, current + 1);
   }
 
   const result: AdminLesson[] = [];
@@ -208,6 +231,7 @@ export async function getAdminLessons(): Promise<AdminLesson[]> {
     const registeredCount = registeredByCourseTerm.get(term.id) ?? 0;
 
     const absentCount = absentByLesson.get(lesson.id) ?? 0;
+    const replacementCount = replacementsByLesson.get(lesson.id) ?? 0;
 
     result.push({
       id: lesson.id,
@@ -224,7 +248,12 @@ export async function getAdminLessons(): Promise<AdminLesson[]> {
 
       registeredCount,
       absentCount,
-      expectedCount: Math.max(registeredCount - absentCount, 0),
+      replacementCount,
+
+      expectedCount: Math.max(
+        registeredCount - absentCount + replacementCount,
+        0,
+      ),
     });
   }
 

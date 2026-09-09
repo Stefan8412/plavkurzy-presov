@@ -178,6 +178,9 @@ export default async function AdminLessonsPage({ searchParams }: PageProps) {
                     <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
                       Odhlásených
                     </th>
+                    <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Náhradníci
+                    </th>
 
                     <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
                       Očakávame
@@ -231,7 +234,9 @@ export default async function AdminLessonsPage({ searchParams }: PageProps) {
                       <td className="px-6 py-4 text-center font-semibold text-orange-700">
                         {lesson.absentCount}
                       </td>
-
+                      <td className="px-6 py-4 text-center font-semibold text-sky-700">
+                        {lesson.replacementCount}
+                      </td>
                       <td className="px-6 py-4 text-center font-semibold text-emerald-700">
                         {lesson.expectedCount}
                       </td>

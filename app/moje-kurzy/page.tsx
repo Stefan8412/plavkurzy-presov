@@ -7,6 +7,10 @@ import { getMyCourseRegistrations } from "@/lib/data/my-courses";
 import { getLessonsForChildRegistration } from "@/lib/data/lessons";
 
 import LessonsList from "@/app/prihlasenie/LessonsList";
+import {
+  getAvailableReplacementLessons,
+  getSelectedReplacementLessons,
+} from "@/lib/data/lesson-replacements";
 
 type MyCoursesPageProps = {
   searchParams: Promise<{
@@ -91,6 +95,22 @@ export default async function MyCoursesPage({
               const lessons = await getLessonsForChildRegistration(
                 registration.childId,
                 registration.courseTermIds,
+              );
+              const replacementOptions = Object.fromEntries(
+                await Promise.all(
+                  lessons
+                    .filter((lesson) => lesson.isAbsent && lesson.absenceId)
+                    .map(async (lesson) => [
+                      lesson.absenceId!,
+                      await getAvailableReplacementLessons({
+                        childId: registration.childId,
+                        absenceId: lesson.absenceId!,
+                      }),
+                    ]),
+                ),
+              );
+              const selectedReplacements = await getSelectedReplacementLessons(
+                registration.childId,
               );
 
               return (
@@ -227,6 +247,8 @@ export default async function MyCoursesPage({
                     <LessonsList
                       childId={registration.childId}
                       lessons={lessons}
+                      replacementOptions={replacementOptions}
+                      selectedReplacements={selectedReplacements}
                     />
                   )}
                 </section>

@@ -478,7 +478,7 @@ export default async function AdminPage() {
                   </p>
                 </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-2">
+                <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <div className="rounded-2xl bg-sky-50 p-3 text-center">
                     <p className="text-xl font-bold text-[#071b55]">
                       {lesson.registeredCount}
@@ -493,6 +493,14 @@ export default async function AdminPage() {
                     </p>
 
                     <p className="mt-1 text-xs text-slate-600">Odhlásených</p>
+                  </div>
+
+                  <div className="rounded-2xl bg-blue-50 p-3 text-center">
+                    <p className="text-xl font-bold text-blue-700">
+                      {lesson.replacementCount}
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-600">Náhradníci</p>
                   </div>
 
                   <div className="rounded-2xl bg-emerald-50 p-3 text-center">

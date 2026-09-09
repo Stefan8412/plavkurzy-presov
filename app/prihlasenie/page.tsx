@@ -541,7 +541,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         {activeExistingRegistration &&
           (activeExistingRegistration.status === "pending" ||
             activeExistingRegistration.status === "confirmed") && (
-            <LessonsList childId={childId!} lessons={lessons} />
+            <LessonsList
+              childId={childId!}
+              lessons={lessons}
+              replacementOptions={{}}
+            />
           )}
       </main>
     );

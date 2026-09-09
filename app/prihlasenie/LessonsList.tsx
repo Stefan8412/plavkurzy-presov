@@ -1,10 +1,20 @@
-import { cancelLessonAbsence, createLessonAbsence } from "./actions";
-
 import type { ChildLesson } from "@/lib/data/lessons";
+import type {
+  AvailableReplacementLesson,
+  SelectedReplacementLesson,
+} from "@/lib/data/lesson-replacements";
+import {
+  cancelLessonAbsence,
+  cancelLessonReplacement,
+  createLessonAbsence,
+  createLessonReplacement,
+} from "./actions";
 
 type LessonsListProps = {
   childId: string;
   lessons: ChildLesson[];
+  replacementOptions: Record<string, AvailableReplacementLesson[]>;
+  selectedReplacements?: Record<string, SelectedReplacementLesson>;
 };
 
 const dayFormatter = new Intl.DateTimeFormat("sk-SK", {
@@ -17,7 +27,12 @@ const dateFormatter = new Intl.DateTimeFormat("sk-SK", {
   year: "numeric",
 });
 
-export default function LessonsList({ childId, lessons }: LessonsListProps) {
+export default function LessonsList({
+  childId,
+  lessons,
+  replacementOptions,
+  selectedReplacements = {},
+}: LessonsListProps) {
   if (lessons.length === 0) {
     return null;
   }
@@ -93,22 +108,151 @@ export default function LessonsList({ childId, lessons }: LessonsListProps) {
               {!isCancelled && (
                 <div className="mt-4 border-t border-slate-100 pt-3">
                   {lesson.isAbsent && lesson.absenceId ? (
-                    <form action={cancelLessonAbsence}>
-                      <input
-                        type="hidden"
-                        name="absenceId"
-                        value={lesson.absenceId}
-                      />
+                    <div className="space-y-3">
+                      {selectedReplacements[lesson.absenceId] &&
+                        (() => {
+                          const selected =
+                            selectedReplacements[lesson.absenceId];
 
-                      <input type="hidden" name="childId" value={childId} />
+                          const selectedDate = new Date(
+                            `${selected.lessonDate}T12:00:00`,
+                          );
 
-                      <button
-                        type="submit"
-                        className="w-full rounded-xl border border-[#009ee9] px-3 py-2 text-sm font-semibold text-[#071b55] transition hover:bg-sky-50"
-                      >
-                        Zrušiť odhlásenie
-                      </button>
-                    </form>
+                          return (
+                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                              <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
+                                ✓ Náhradná lekcia rezervovaná
+                              </p>
+
+                              <p className="mt-2 font-bold capitalize text-[#071b55]">
+                                {dayFormatter.format(selectedDate)}{" "}
+                                {dateFormatter.format(selectedDate)}
+                              </p>
+
+                              <p className="mt-1 text-sm text-slate-600">
+                                {selected.startTime.slice(0, 5)} –{" "}
+                                {selected.endTime.slice(0, 5)}
+                              </p>
+                              <form
+                                action={cancelLessonReplacement}
+                                className="mt-3"
+                              >
+                                <input
+                                  type="hidden"
+                                  name="replacementId"
+                                  value={selected.id}
+                                />
+
+                                <input
+                                  type="hidden"
+                                  name="childId"
+                                  value={childId}
+                                />
+
+                                <button
+                                  type="submit"
+                                  className="w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
+                                >
+                                  Zrušiť náhradu
+                                </button>
+                              </form>
+                            </div>
+                          );
+                        })()}
+                      {!selectedReplacements[lesson.absenceId] &&
+                        (replacementOptions[lesson.absenceId] ?? []).length >
+                          0 && (
+                          <div className="rounded-xl bg-sky-50 p-3">
+                            <p className="text-xs font-bold uppercase tracking-wide text-[#009ee9]">
+                              Dostupná náhrada
+                            </p>
+
+                            <div className="mt-2 space-y-2">
+                              {(replacementOptions[lesson.absenceId] ?? []).map(
+                                (replacement) => {
+                                  const replacementDate = new Date(
+                                    `${replacement.lessonDate}T12:00:00`,
+                                  );
+
+                                  return (
+                                    <div
+                                      key={replacement.id}
+                                      className="rounded-lg bg-white px-3 py-2 text-sm"
+                                    >
+                                      <p className="font-bold capitalize text-[#071b55]">
+                                        {dayFormatter.format(replacementDate)}{" "}
+                                        {dateFormatter.format(replacementDate)}
+                                      </p>
+
+                                      <p className="mt-1 text-xs text-slate-500">
+                                        {replacement.startTime.slice(0, 5)} –{" "}
+                                        {replacement.endTime.slice(0, 5)}
+                                      </p>
+
+                                      <p className="mt-1 text-xs font-semibold text-emerald-700">
+                                        Voľné miesta:{" "}
+                                        {replacement.availablePlaces}
+                                      </p>
+                                      <form
+                                        action={createLessonReplacement}
+                                        className="mt-3"
+                                      >
+                                        <input
+                                          type="hidden"
+                                          name="childId"
+                                          value={childId}
+                                        />
+                                        <input
+                                          type="hidden"
+                                          name="absenceId"
+                                          value={lesson.absenceId!}
+                                        />
+                                        <input
+                                          type="hidden"
+                                          name="replacementLessonId"
+                                          value={replacement.id}
+                                        />
+
+                                        <button
+                                          type="submit"
+                                          className="w-full rounded-lg bg-[#009ee9] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#0087c9]"
+                                        >
+                                          Vybrať náhradu
+                                        </button>
+                                      </form>
+                                    </div>
+                                  );
+                                },
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                      {!selectedReplacements[lesson.absenceId] &&
+                        (replacementOptions[lesson.absenceId] ?? []).length ===
+                          0 && (
+                          <p className="text-xs leading-5 text-slate-500">
+                            Momentálne nie je dostupný žiadny náhradný termín.
+                          </p>
+                        )}
+
+                      <form action={cancelLessonAbsence}>
+                        <input
+                          type="hidden"
+                          name="absenceId"
+                          value={lesson.absenceId}
+                        />
+
+                        <input type="hidden" name="childId" value={childId} />
+
+                        <button
+                          type="submit"
+                          className="w-full rounded-xl border border-[#009ee9] px-3 py-2 text-sm font-semibold text-[#071b55] transition hover:bg-sky-50"
+                        >
+                          Zrušiť odhlásenie
+                        </button>
+                      </form>
+                    </div>
                   ) : (
                     <form action={createLessonAbsence}>
                       <input type="hidden" name="lessonId" value={lesson.id} />

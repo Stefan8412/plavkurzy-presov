@@ -238,3 +238,93 @@ export async function cancelLessonAbsence(formData: FormData) {
   revalidatePath("/prihlasenie");
   revalidatePath("/moje-kurzy");
 }
+export async function createLessonReplacement(formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Musíte byť prihlásený.");
+  }
+
+  const childId = String(formData.get("childId") ?? "");
+  const absenceId = String(formData.get("absenceId") ?? "");
+  const replacementLessonId = String(formData.get("replacementLessonId") ?? "");
+
+  if (!childId || !absenceId || !replacementLessonId) {
+    throw new Error("Chýbajú údaje pre náhradnú lekciu.");
+  }
+
+  const { data, error } = await supabase.rpc("create_lesson_replacement", {
+    p_child_id: childId,
+    p_absence_id: absenceId,
+    p_replacement_lesson_id: replacementLessonId,
+  });
+
+  if (error) {
+    console.error("Chyba pri vytvorení náhradnej lekcie:", error);
+
+    if (error.message.includes("už bola vybraná")) {
+      throw new Error("Za toto odhlásenie už bola náhradná lekcia vybraná.");
+    }
+
+    if (error.message.includes("už obsadená")) {
+      throw new Error("Táto náhradná lekcia už nemá voľné miesto.");
+    }
+
+    if (error.message.includes("rovnakého kurzu a obdobia")) {
+      throw new Error("Náhradná lekcia musí byť v rovnakom kurze a období.");
+    }
+
+    if (error.message.includes("pravidelne prihlásené")) {
+      throw new Error("Dieťa je už na tomto termíne prihlásené.");
+    }
+
+    throw new Error("Náhradnú lekciu sa nepodarilo vybrať.");
+  }
+
+  revalidatePath("/moje-kurzy");
+
+  return data;
+}
+export async function cancelLessonReplacement(formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Musíte byť prihlásený.");
+  }
+
+  const replacementId = String(formData.get("replacementId") ?? "");
+  const childId = String(formData.get("childId") ?? "");
+
+  if (!replacementId || !childId) {
+    throw new Error("Chýbajú údaje o náhradnej lekcii.");
+  }
+
+  const { error } = await supabase.rpc("cancel_lesson_replacement", {
+    p_replacement_id: replacementId,
+    p_child_id: childId,
+  });
+
+  if (error) {
+    console.error("Chyba pri zrušení náhradnej lekcie:", error);
+
+    if (error.message.includes("nemáte prístup")) {
+      throw new Error("K tejto náhradnej lekcii nemáte prístup.");
+    }
+
+    if (error.message.includes("sa nenašla")) {
+      throw new Error("Náhradná lekcia sa nenašla.");
+    }
+
+    throw new Error("Náhradnú lekciu sa nepodarilo zrušiť.");
+  }
+
+  revalidatePath("/moje-kurzy");
+}
