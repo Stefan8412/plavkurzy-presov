@@ -8,6 +8,12 @@ export async function POST(request: Request) {
     if (!question || typeof question !== "string") {
       return NextResponse.json({ error: "Chýba otázka." }, { status: 400 });
     }
+    if (question.trim().length > 500) {
+      return NextResponse.json(
+        { error: "Otázka môže mať maximálne 500 znakov." },
+        { status: 400 },
+      );
+    }
 
     const apiKey = process.env.GEMINI_API_KEY;
 
