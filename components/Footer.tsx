@@ -135,43 +135,75 @@ export default function Footer() {
 
           <div className="grid grid-cols-2 items-center gap-x-8 gap-y-8 sm:grid-cols-4">
             <div className="flex items-center justify-center">
-              <Image
-                src="/images/partner-1.png"
-                alt="Partner 1"
-                width={220}
-                height={100}
-                className="max-h-16 w-auto max-w-full object-contain"
-              />
+              <a
+                href="https://aquaparkpresov.sk/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center transition hover:opacity-80"
+                aria-label="Navštíviť web Partnera 1"
+              >
+                <Image
+                  src="/images/partner-1.png"
+                  alt="Delňa Aquapark Prešov"
+                  width={220}
+                  height={100}
+                  className="max-h-16 w-auto max-w-full object-contain"
+                />
+              </a>
             </div>
 
             <div className="flex items-center justify-center">
-              <Image
-                src="/images/partner-2.png"
-                alt="Partner 2"
-                width={220}
-                height={100}
-                className="max-h-16 w-auto max-w-full object-contain"
-              />
+              <a
+                href="https://www.hurka.sk/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center transition hover:opacity-80"
+                aria-label="Navštíviť web Partnera 1"
+              >
+                <Image
+                  src="/images/partner-2.png"
+                  alt="Mäsovýroba Pečovská"
+                  width={220}
+                  height={100}
+                  className="max-h-16 w-auto max-w-full object-contain"
+                />
+              </a>
             </div>
 
             <div className="flex items-center justify-center">
-              <Image
-                src="/images/partner-3.png"
-                alt="Partner 3"
-                width={220}
-                height={100}
-                className="max-h-16 w-auto max-w-full object-contain"
-              />
+              <a
+                href="https://www.steakhousepo.sk/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center transition hover:opacity-80"
+                aria-label="Navštíviť web Partnera 1"
+              >
+                <Image
+                  src="/images/partner-3.png"
+                  alt="Steakhouse Preshow"
+                  width={220}
+                  height={100}
+                  className="max-h-16 w-auto max-w-full object-contain"
+                />
+              </a>
             </div>
 
             <div className="flex items-center justify-center">
-              <Image
-                src="/images/partner-4.png"
-                alt="Partner 4"
-                width={220}
-                height={100}
-                className="max-h-16 w-auto max-w-full object-contain"
-              />
+              <a
+                href="https://dsservice.sk/uvod.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center transition hover:opacity-80"
+                aria-label="Navštíviť web Partnera 1"
+              >
+                <Image
+                  src="/images/partner-4.png"
+                  alt="DS Service"
+                  width={220}
+                  height={100}
+                  className="max-h-16 w-auto max-w-full object-contain"
+                />
+              </a>
             </div>
           </div>
         </div>
