@@ -38,3 +38,70 @@ a {
   background: var(--primary-light);
   color: var(--primary-dark);
 }
+.wave-text {
+  display: inline-block;
+}
+
+.wave-letter {
+  display: inline-block;
+  background: linear-gradient(
+    110deg,
+    #071b55 0%,
+    #071b55 30%,
+    #009ee9 45%,
+    #7dd3fc 50%,
+    #009ee9 55%,
+    #071b55 70%,
+    #071b55 100%
+  );
+  background-size: 250% 100%;
+  background-position: 100% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  animation:
+    waveText 2.8s ease-in-out infinite,
+    waterShine 4.5s ease-in-out infinite;
+}
+
+@keyframes waveText {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  25% {
+    transform: translateY(-5px);
+  }
+
+  50% {
+    transform: translateY(0);
+  }
+
+  75% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes waterShine {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  50% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-letter {
+    animation: none;
+    background: none;
+    color: inherit;
+  }
+}

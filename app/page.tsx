@@ -66,9 +66,38 @@ export default function Home() {
               FEDDY plavecká škola
             </div>
 
-            <h1 className="text-5xl font-extrabold tracking-tight text-[#071b55] md:text-6xl">
-              Plávanie hrou,
-              <span className="block text-[#009ee9]">hra plávaním.</span>
+            <h1 className="text-5xl font-extrabold tracking-tight md:text-6xl">
+              <span
+                className="wave-text text-[#071b55]"
+                aria-label="Plávanie hrou,"
+              >
+                {"Plávanie hrou,".split("").map((char, index) => (
+                  <span
+                    key={index}
+                    className="wave-letter"
+                    style={{ animationDelay: `${index * 60}ms` }}
+                    aria-hidden="true"
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </span>
+                ))}
+              </span>
+
+              <span
+                className="wave-text block text-[#009ee9]"
+                aria-label="hra plávaním."
+              >
+                {"hra plávaním.".split("").map((char, index) => (
+                  <span
+                    key={index}
+                    className="wave-letter"
+                    style={{ animationDelay: `${(index + 14) * 60}ms` }}
+                    aria-hidden="true"
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </span>
+                ))}
+              </span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">

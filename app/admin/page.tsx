@@ -91,6 +91,14 @@ export default async function AdminPage() {
           <p className="mt-3 text-slate-600">
             Prehľad detí prihlásených na jednotlivé kurzy a termíny.
           </p>
+          <div className="mt-6">
+            <a
+              href="/api/admin/export-registrations"
+              className="inline-flex items-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            >
+              Exportovať do Excelu
+            </a>
+          </div>
         </div>
       </section>
 
