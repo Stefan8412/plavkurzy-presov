@@ -204,7 +204,10 @@ export default async function MyCoursesPage({
                               </span>
                             )}
                           </div>
-                          {registration.payment?.status === "pending" &&
+                          {registration.payment &&
+                            ["pending", "cancelled", "failed"].includes(
+                              registration.payment.status,
+                            ) &&
                             (registration.status === "pending" ||
                               registration.status === "confirmed") && (
                               <form
@@ -218,7 +221,9 @@ export default async function MyCoursesPage({
                                   type="submit"
                                   className="inline-flex w-full items-center justify-center rounded-full bg-[#009ee9] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0087c9] sm:w-auto"
                                 >
-                                  Zaplatiť cez Comgate
+                                  {registration.payment.status === "pending"
+                                    ? "Zaplatiť cez Comgate"
+                                    : "Zaplatiť znova cez Comgate"}
                                 </button>
                               </form>
                             )}

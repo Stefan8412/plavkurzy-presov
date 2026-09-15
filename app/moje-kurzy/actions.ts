@@ -84,7 +84,11 @@ export async function payRegistration(registrationGroupId: string) {
     redirect("/moje-kurzy");
   }
 
-  if (payment.status !== "pending") {
+  if (
+    payment.status !== "pending" &&
+    payment.status !== "cancelled" &&
+    payment.status !== "failed"
+  ) {
     throw new Error("Túto platbu momentálne nie je možné zaplatiť.");
   }
 
