@@ -5,6 +5,83 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
+type CreateCoursePeriodInput = {
+  startDate: string;
+  endDate: string;
+  noSwimmingDays: string[];
+};
+
+export async function createCoursePeriod(input: CreateCoursePeriodInput) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/prihlasenie");
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || profile?.role !== "admin") {
+    throw new Error("Nemáte oprávnenie vytvárať obdobia kurzov.");
+  }
+
+  if (!input.startDate || !input.endDate) {
+    throw new Error("Zadajte začiatok a koniec obdobia.");
+  }
+
+  if (input.endDate < input.startDate) {
+    throw new Error("Koniec obdobia nemôže byť pred začiatkom.");
+  }
+
+  const { data: sourceTerm, error: sourceError } = await supabase
+    .from("course_terms")
+    .select("start_date, end_date")
+    .order("end_date", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (sourceError || !sourceTerm) {
+    console.error("Zdrojové obdobie sa nepodarilo načítať:", sourceError);
+    throw new Error("Nenašlo sa zdrojové obdobie kurzov.");
+  }
+
+  const { data, error } = await supabase.rpc(
+    "create_course_period_with_lessons",
+    {
+      p_source_start_date: sourceTerm.start_date,
+      p_source_end_date: sourceTerm.end_date,
+      p_new_start_date: input.startDate,
+      p_new_end_date: input.endDate,
+      p_no_swimming_days: input.noSwimmingDays,
+    },
+  );
+
+  if (error) {
+    console.error("Chyba pri vytváraní nového obdobia:", error);
+    throw new Error(error.message || "Nové obdobie sa nepodarilo vytvoriť.");
+  }
+
+  const result = Array.isArray(data) ? data[0] : data;
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/terminy");
+  revalidatePath("/admin/lekcie");
+  revalidatePath("/kurzy");
+
+  return {
+    success: true,
+    createdTerms: Number(result?.created_terms ?? 0),
+    createdLessons: Number(result?.created_lessons ?? 0),
+  };
+}
+
 export async function updateCourseTerm(formData: FormData) {
   const supabase = await createClient();
 

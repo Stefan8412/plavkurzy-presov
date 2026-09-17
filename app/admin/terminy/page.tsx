@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-
+import NewCoursePeriodForm from "./NewCoursePeriodForm";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminCourseTerms } from "@/lib/data/admin-course-terms";
 
@@ -67,6 +67,9 @@ export default async function AdminCourseTermsPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-10">
+          <NewCoursePeriodForm />
+        </div>
         {terms.length === 0 ? (
           <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <p className="text-slate-600">
