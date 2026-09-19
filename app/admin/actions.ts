@@ -28,6 +28,13 @@ async function requireAdmin() {
   return supabase;
 }
 
+function revalidateRegistrationPaths() {
+  revalidatePath("/admin");
+  revalidatePath("/prihlasenie");
+  revalidatePath("/moje-kurzy");
+  revalidatePath("/kurzy");
+}
+
 export async function confirmRegistration(registrationId: string) {
   const supabase = await requireAdmin();
 
@@ -55,10 +62,7 @@ export async function confirmRegistration(registrationId: string) {
     throw new Error("Registráciu sa nepodarilo potvrdiť.");
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/prihlasenie");
-  revalidatePath("/moje-kurzy");
-  revalidatePath("/kurzy");
+  revalidateRegistrationPaths();
 }
 
 export async function cancelRegistration(registrationId: string) {
@@ -88,8 +92,21 @@ export async function cancelRegistration(registrationId: string) {
     throw new Error("Registráciu sa nepodarilo zrušiť.");
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/prihlasenie");
-  revalidatePath("/moje-kurzy");
-  revalidatePath("/kurzy");
+  revalidateRegistrationPaths();
+}
+
+export async function markRegistrationPaid(registrationId: string) {
+  const supabase = await requireAdmin();
+
+  const { error } = await supabase.rpc("admin_mark_registration_paid", {
+    p_registration_id: registrationId,
+  });
+
+  if (error) {
+    console.error("Chyba pri manuálnom označení platby:", error);
+
+    throw new Error("Platbu sa nepodarilo označiť ako zaplatenú.");
+  }
+
+  revalidateRegistrationPaths();
 }

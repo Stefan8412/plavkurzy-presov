@@ -5,7 +5,11 @@ import { getAdminLessons } from "@/lib/data/admin-lessons";
 import Link from "next/link";
 import { getAdminPayments } from "@/lib/data/admin-payments";
 
-import { confirmRegistration, cancelRegistration } from "./actions";
+import {
+  confirmRegistration,
+  cancelRegistration,
+  markRegistrationPaid,
+} from "./actions";
 
 const dayLabels: Record<number, string> = {
   1: "Pondelok",
@@ -369,6 +373,23 @@ export default async function AdminPage() {
 
                       <td className="whitespace-nowrap px-6 py-5">
                         <div className="flex flex-wrap gap-2">
+                          {paymentByRegistrationGroup.get(
+                            registration.registrationGroupId,
+                          )?.status !== "paid" && (
+                            <form
+                              action={markRegistrationPaid.bind(
+                                null,
+                                registration.id,
+                              )}
+                            >
+                              <button
+                                type="submit"
+                                className="rounded-full bg-[#009ee9] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                              >
+                                Označiť ako zaplatené
+                              </button>
+                            </form>
+                          )}
                           {registration.status !== "confirmed" &&
                             registration.status !== "cancelled" && (
                               <form
