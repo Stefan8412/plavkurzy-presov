@@ -3,6 +3,7 @@ import Link from "next/link";
 
 const navigation = [
   { label: "Kurzy", href: "/kurzy" },
+  { label: "Letný tábor", href: "/letny-tabor" },
   { label: "Cenník", href: "/cennik" },
   { label: "O nás", href: "/o-nas" },
   { label: "Pre škôlky a školy", href: "/skolky-skoly" },

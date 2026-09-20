@@ -9,12 +9,14 @@ type LoginFormProps = {
   termId?: string;
   secondTermId?: string;
   frequency?: 1 | 2;
+  nextUrl?: string;
 };
 
 export default function LoginForm({
   termId,
   secondTermId,
   frequency = 1,
+  nextUrl,
 }: LoginFormProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -67,6 +69,17 @@ export default function LoginForm({
 
     if (profile?.role === "admin") {
       router.push("/admin");
+      router.refresh();
+      return;
+    }
+
+    const safeNextUrl =
+      nextUrl?.startsWith("/") && !nextUrl.startsWith("//")
+        ? nextUrl
+        : undefined;
+
+    if (safeNextUrl) {
+      router.push(safeNextUrl);
       router.refresh();
       return;
     }

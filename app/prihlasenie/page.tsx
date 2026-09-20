@@ -17,6 +17,7 @@ type LoginPageProps = {
     term2?: string;
     frequency?: string;
     child?: string;
+    next?: string;
   }>;
 };
 
@@ -59,6 +60,10 @@ function buildRegistrationUrl({
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
+  const nextUrl =
+    params.next?.startsWith("/") && !params.next.startsWith("//")
+      ? params.next
+      : undefined;
 
   const termId = params.term;
   const secondTermId = params.term2;
@@ -109,13 +114,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
 
         <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <LoginForm />
+          <LoginForm nextUrl={nextUrl} />
 
           <div className="mt-8 border-t border-slate-100 pt-6 text-center">
             <p className="text-sm text-slate-500">Ešte nemáte účet?</p>
 
             <Link
-              href="/registracia"
+              href={
+                nextUrl
+                  ? `/registracia?next=${encodeURIComponent(nextUrl)}`
+                  : "/registracia"
+              }
               className="mt-2 inline-block text-sm font-semibold text-[#009ee9] hover:text-[#0087c9]"
             >
               Vytvoriť účet

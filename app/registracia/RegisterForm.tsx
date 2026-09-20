@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 
 type RegisterFormProps = {
   termId?: string;
+  nextUrl?: string;
 };
 
-export default function RegisterForm({ termId }: RegisterFormProps) {
+export default function RegisterForm({ termId, nextUrl }: RegisterFormProps) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -59,7 +60,18 @@ export default function RegisterForm({ termId }: RegisterFormProps) {
       return;
     }
 
-    const redirectUrl = termId ? `/prihlasenie?term=${termId}` : "/prihlasenie";
+    const safeNextUrl =
+      nextUrl?.startsWith("/") && !nextUrl.startsWith("//")
+        ? nextUrl
+        : undefined;
+
+    let redirectUrl = "/prihlasenie";
+
+    if (safeNextUrl) {
+      redirectUrl = `/prihlasenie?next=${encodeURIComponent(safeNextUrl)}`;
+    } else if (termId) {
+      redirectUrl = `/prihlasenie?term=${encodeURIComponent(termId)}`;
+    }
 
     router.push(redirectUrl);
     router.refresh();

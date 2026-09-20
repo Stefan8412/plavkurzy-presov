@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const navigation = [
   { label: "Kurzy", href: "/kurzy" },
+  { label: "Letný tábor", href: "/letny-tabor" },
   { label: "Pre škôlky a školy", href: "/skolky-skoly" },
   { label: "O nás", href: "/o-nas" },
   /* { label: "Tréneri", href: "/treneri" }, */
