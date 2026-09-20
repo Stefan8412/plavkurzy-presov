@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { createComgatePayment } from "@/lib/comgate";
 
 export type CampRegistrationActionState = {
   success: boolean;
@@ -152,4 +154,116 @@ export async function registerChildForCamp(
     success: true,
     message: "Prihláška na letný tábor bola úspešne odoslaná.",
   };
+}
+export async function payCampRegistration(registrationId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Musíte byť prihlásený.");
+  }
+
+  if (!user.email) {
+    throw new Error("K účtu nie je priradený e-mail.");
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("first_name, last_name")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile) {
+    throw new Error("Profil používateľa sa nenašiel.");
+  }
+
+  const { data: registration, error: registrationError } = await supabase
+    .from("camp_registrations")
+    .select(
+      `
+      id,
+      parent_id,
+      status
+    `,
+    )
+    .eq("id", registrationId)
+    .single();
+
+  if (registrationError || !registration) {
+    throw new Error("Prihláška na letný tábor sa nenašla.");
+  }
+
+  if (registration.parent_id !== user.id) {
+    throw new Error("K tejto prihláške nemáte prístup.");
+  }
+
+  if (registration.status === "cancelled") {
+    throw new Error("Zrušenú prihlášku nie je možné zaplatiť.");
+  }
+
+  const { data: payment, error: paymentError } = await supabase
+    .from("camp_payments")
+    .select(
+      `
+      amount,
+      currency,
+      status
+    `,
+    )
+    .eq("camp_registration_id", registrationId)
+    .single();
+
+  if (paymentError || !payment) {
+    throw new Error("Platba sa nenašla.");
+  }
+
+  if (payment.status === "paid") {
+    redirect("/letny-tabor/registracia");
+  }
+
+  if (
+    payment.status !== "pending" &&
+    payment.status !== "cancelled" &&
+    payment.status !== "failed"
+  ) {
+    throw new Error("Túto platbu momentálne nie je možné zaplatiť.");
+  }
+
+  if (payment.currency !== "EUR") {
+    throw new Error("Nepodporovaná mena platby.");
+  }
+
+  const referenceId = `T${registrationId.replaceAll("-", "").slice(0, 19)}`;
+
+  const comgatePayment = await createComgatePayment({
+    amount: Number(payment.amount),
+    referenceId,
+    label: "FEDDY letny tabor",
+    email: user.email,
+    fullName: `${profile.first_name} ${profile.last_name}`,
+  });
+
+  const { error: referenceError } = await supabase.rpc(
+    "set_camp_comgate_payment_reference",
+    {
+      p_registration_id: registrationId,
+      p_provider_payment_id: comgatePayment.transId,
+    },
+  );
+
+  if (referenceError) {
+    console.error(
+      "Chyba pri ukladaní Comgate transId pre tábor:",
+      referenceError,
+    );
+
+    throw new Error(
+      "Platba bola vytvorená, ale nepodarilo sa uložiť jej identifikátor.",
+    );
+  }
+
+  redirect(comgatePayment.redirect);
 }

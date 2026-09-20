@@ -95,13 +95,20 @@ export default async function AdminPage() {
           <p className="mt-3 text-slate-600">
             Prehľad detí prihlásených na jednotlivé kurzy a termíny.
           </p>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-wrap gap-3">
             <a
               href="/api/admin/export-registrations"
               className="inline-flex items-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
             >
               Exportovať do Excelu
             </a>
+
+            <Link
+              href="/admin/letny-tabor"
+              className="inline-flex items-center rounded-full bg-[#071b55] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Letný tábor
+            </Link>
           </div>
         </div>
       </section>

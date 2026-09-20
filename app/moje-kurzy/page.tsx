@@ -11,6 +11,8 @@ import {
   getAvailableReplacementLessons,
   getSelectedReplacementLessons,
 } from "@/lib/data/lesson-replacements";
+import { getMyCampRegistrations } from "@/lib/data/my-camp-registrations";
+import { payCampRegistration } from "@/app/letny-tabor/registracia/actions";
 
 type MyCoursesPageProps = {
   searchParams: Promise<{
@@ -34,6 +36,7 @@ export default async function MyCoursesPage({
   }
 
   const registrations = await getMyCourseRegistrations();
+  const campRegistrations = await getMyCampRegistrations();
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-16 lg:px-8">
@@ -262,6 +265,181 @@ export default async function MyCoursesPage({
           )}
         </div>
       )}
+      <section className="mt-16 border-t border-slate-200 pt-10">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#009ee9]">
+            FEDDY
+          </p>
+
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#071b55]">
+            Letný tábor
+          </h2>
+
+          <p className="mt-3 max-w-2xl text-slate-600">
+            Vaše aktívne prihlášky na Denný letný plavecký tábor FEDDY.
+          </p>
+        </div>
+
+        {campRegistrations.length === 0 ? (
+          <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <h3 className="text-xl font-bold text-slate-950">
+              Zatiaľ nemáte prihlášku na letný tábor
+            </h3>
+
+            <Link
+              href="/letny-tabor"
+              className="mt-6 inline-flex rounded-full bg-[#071b55] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Zobraziť letný tábor
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-8 space-y-6">
+            {campRegistrations.map((campRegistration) => (
+              <div
+                key={campRegistration.id}
+                className="rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:p-6"
+              >
+                <div className="rounded-2xl bg-white p-5 shadow-sm">
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-500">
+                        Dieťa
+                      </p>
+
+                      <h3 className="mt-1 text-2xl font-bold text-[#071b55]">
+                        {campRegistration.child.firstName}{" "}
+                        {campRegistration.child.lastName}
+                      </h3>
+
+                      <p className="mt-4 text-sm font-medium text-slate-500">
+                        Turnus
+                      </p>
+
+                      <p className="mt-1 text-lg font-bold text-slate-950">
+                        {campRegistration.term.name}
+                      </p>
+
+                      <p className="mt-1 text-sm text-slate-600">
+                        {new Intl.DateTimeFormat("sk-SK").format(
+                          new Date(
+                            `${campRegistration.term.startDate}T12:00:00`,
+                          ),
+                        )}{" "}
+                        –{" "}
+                        {new Intl.DateTimeFormat("sk-SK").format(
+                          new Date(`${campRegistration.term.endDate}T12:00:00`),
+                        )}
+                      </p>
+
+                      <p className="mt-3 text-sm text-slate-600">
+                        {campRegistration.mealPortion === "adult"
+                          ? "Dospelá porcia"
+                          : "Detská porcia"}
+                        {" · "}
+                        Tričko {campRegistration.shirtSize}
+                      </p>
+                    </div>
+
+                    <div className="sm:text-right">
+                      <p className="text-sm text-slate-500">Cena</p>
+
+                      <p className="mt-1 text-xl font-bold text-slate-950">
+                        {campRegistration.totalPrice} €
+                      </p>
+
+                      <div className="mt-3">
+                        {campRegistration.status === "confirmed" ? (
+                          <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                            Potvrdená
+                          </span>
+                        ) : (
+                          <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                            Čaká na potvrdenie
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 border-t border-slate-100 pt-5">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Platba
+                        </p>
+
+                        <div className="mt-2">
+                          {campRegistration.payment?.status === "paid" ? (
+                            <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                              Zaplatené
+                            </span>
+                          ) : campRegistration.payment?.status === "failed" ? (
+                            <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                              Platba zlyhala
+                            </span>
+                          ) : campRegistration.payment?.status ===
+                            "refunded" ? (
+                            <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                              Platba vrátená
+                            </span>
+                          ) : campRegistration.payment?.status ===
+                            "cancelled" ? (
+                            <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                              Platba zrušená
+                            </span>
+                          ) : (
+                            <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                              Čaká na platbu
+                            </span>
+                          )}
+                        </div>
+
+                        {campRegistration.payment &&
+                          ["pending", "cancelled", "failed"].includes(
+                            campRegistration.payment.status,
+                          ) && (
+                            <form
+                              action={payCampRegistration.bind(
+                                null,
+                                campRegistration.id,
+                              )}
+                              className="mt-4"
+                            >
+                              <button
+                                type="submit"
+                                className="inline-flex w-full items-center justify-center rounded-full bg-[#009ee9] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0087c9] sm:w-auto"
+                              >
+                                {campRegistration.payment.status === "pending"
+                                  ? "Zaplatiť cez Comgate"
+                                  : "Zaplatiť znova cez Comgate"}
+                              </button>
+                            </form>
+                          )}
+                      </div>
+
+                      {campRegistration.payment && (
+                        <div className="sm:text-right">
+                          <p className="text-sm text-slate-500">
+                            Suma na úhradu
+                          </p>
+
+                          <p className="mt-1 text-lg font-bold text-[#071b55]">
+                            {campRegistration.payment.amount}{" "}
+                            {campRegistration.payment.currency === "EUR"
+                              ? "€"
+                              : campRegistration.payment.currency}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

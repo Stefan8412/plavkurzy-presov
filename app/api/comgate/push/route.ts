@@ -87,6 +87,51 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient();
 
+    // Najprv zistíme, či transId patrí platbe za letný tábor.
+    const { data: campPayment, error: campLookupError } = await supabase
+      .from("camp_payments")
+      .select("id")
+      .eq("provider", "comgate")
+      .eq("provider_payment_id", transId)
+      .maybeSingle();
+
+    if (campLookupError) {
+      console.error(
+        "Chyba pri hľadaní táborovej Comgate platby:",
+        campLookupError,
+      );
+
+      return new NextResponse("ERROR", {
+        status: 500,
+      });
+    }
+
+    if (campPayment) {
+      const { error: campError } = await supabase.rpc(
+        "process_camp_comgate_payment_status",
+        {
+          p_provider_payment_id: transId,
+          p_status: comgatePayment.status,
+        },
+      );
+
+      if (campError) {
+        console.error(
+          "Chyba pri spracovaní Comgate platby za tábor:",
+          campError,
+        );
+
+        return new NextResponse("ERROR", {
+          status: 500,
+        });
+      }
+
+      return new NextResponse("OK", {
+        status: 200,
+      });
+    }
+
+    // Ak transId nepatrí táboru, zachováme pôvodné spracovanie kurzovej platby.
     const { error } = await supabase.rpc("process_comgate_payment_status", {
       p_provider_payment_id: transId,
       p_status: comgatePayment.status,
