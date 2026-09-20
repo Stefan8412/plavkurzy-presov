@@ -6,6 +6,7 @@ export type AdminLessonChild = {
   lastName: string;
   isAbsent: boolean;
   isReplacement: boolean;
+  attended: boolean;
 };
 
 export type AdminLessonDetail = {
@@ -104,6 +105,10 @@ type ReplacementRow = {
       }[]
     | null;
 };
+type AttendanceRow = {
+  child_id: string;
+  attended: boolean;
+};
 
 function first<T>(value: T | T[] | null): T | null {
   if (!value) {
@@ -189,6 +194,7 @@ export async function getAdminLessonDetail(
     { data: registrationsData, error: registrationsError },
     { data: absencesData, error: absencesError },
     { data: replacementsData, error: replacementsError },
+    { data: attendanceData, error: attendanceError },
   ] = await Promise.all([
     supabase
       .from("registrations")
@@ -223,6 +229,10 @@ export async function getAdminLessonDetail(
       `,
       )
       .eq("replacement_lesson_id", lesson.id),
+    supabase
+      .from("lesson_attendance")
+      .select("child_id, attended")
+      .eq("lesson_id", lesson.id),
   ]);
 
   if (registrationsError) {
@@ -242,10 +252,19 @@ export async function getAdminLessonDetail(
     );
     throw new Error("Nepodarilo sa načítať náhradníkov.");
   }
+  if (attendanceError) {
+    console.error("Chyba pri načítaní dochádzky:", attendanceError);
+    throw new Error("Nepodarilo sa načítať dochádzku.");
+  }
 
   const registrations = (registrationsData ?? []) as RegistrationRow[];
   const absences = (absencesData ?? []) as AbsenceRow[];
   const replacements = (replacementsData ?? []) as ReplacementRow[];
+  const attendance = (attendanceData ?? []) as AttendanceRow[];
+
+  const attendedChildIds = new Set(
+    attendance.filter((item) => item.attended).map((item) => item.child_id),
+  );
 
   const absentChildIds = new Set(absences.map((absence) => absence.child_id));
 
@@ -266,6 +285,7 @@ export async function getAdminLessonDetail(
         lastName: child.last_name,
         isAbsent: absentChildIds.has(child.id),
         isReplacement: false,
+        attended: attendedChildIds.has(child.id),
       };
     })
     .filter((child): child is AdminLessonChild => child !== null);
@@ -288,6 +308,7 @@ export async function getAdminLessonDetail(
         lastName: child.last_name,
         isAbsent: false,
         isReplacement: true,
+        attended: attendedChildIds.has(child.id),
       };
     })
     .filter((child): child is AdminLessonChild => child !== null);

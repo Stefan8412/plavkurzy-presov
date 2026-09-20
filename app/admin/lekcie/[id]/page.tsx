@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-
+import AttendanceCheckbox from "./AttendanceCheckbox";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminLessonDetail } from "@/lib/data/admin-lesson-detail";
 
@@ -134,15 +134,23 @@ export default async function AdminLessonDetailPage({ params }: PageProps) {
                     {child.firstName} {child.lastName}
                   </p>
 
-                  {child.isAbsent ? (
-                    <span className="inline-flex w-fit rounded-full bg-orange-50 px-3 py-1.5 text-sm font-semibold text-orange-700">
-                      Odhlásený
-                    </span>
-                  ) : (
-                    <span className="inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
-                      Príde
-                    </span>
-                  )}
+                  <div className="flex flex-wrap items-center gap-3">
+                    {child.isAbsent ? (
+                      <span className="inline-flex w-fit rounded-full bg-orange-50 px-3 py-1.5 text-sm font-semibold text-orange-700">
+                        Odhlásený
+                      </span>
+                    ) : (
+                      <span className="inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
+                        Príde
+                      </span>
+                    )}
+
+                    <AttendanceCheckbox
+                      lessonId={lesson.id}
+                      childId={child.childId}
+                      initialAttended={child.attended}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
