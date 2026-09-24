@@ -23,6 +23,14 @@ type PageProps = {
     date?: string;
   }>;
 };
+function isPastLesson(date: string) {
+  const lessonDate = new Date(`${date}T12:00:00`);
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
+  return lessonDate < today;
+}
 
 export default async function AdminLessonsPage({ searchParams }: PageProps) {
   const supabase = await createClient();
@@ -200,7 +208,11 @@ export default async function AdminLessonsPage({ searchParams }: PageProps) {
                   {filteredLessons.map((lesson) => (
                     <tr
                       key={lesson.id}
-                      className="transition hover:bg-slate-50"
+                      className={
+                        isPastLesson(lesson.lessonDate)
+                          ? "bg-slate-50 text-slate-400 opacity-60 line-through"
+                          : "transition hover:bg-slate-50"
+                      }
                     >
                       <td className="whitespace-nowrap px-6 py-4">
                         <p className="font-semibold text-slate-900">

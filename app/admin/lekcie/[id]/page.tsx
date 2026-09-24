@@ -56,12 +56,21 @@ export default async function AdminLessonDetailPage({ params }: PageProps) {
     <main className="min-h-screen bg-slate-50">
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-5xl px-6 py-10">
-          <Link
-            href="/admin/lekcie"
-            className="text-sm font-semibold text-[#009ee9] transition hover:underline"
-          >
-            ← Späť na lekcie
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <Link
+              href="/admin/lekcie"
+              className="text-sm font-semibold text-[#009ee9] transition hover:underline"
+            >
+              ← Späť na lekcie
+            </Link>
+
+            <a
+              href={`/api/admin/lekcie/${lesson.id}/export`}
+              className="inline-flex items-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            >
+              Exportovať do Excelu
+            </a>
+          </div>
 
           <p className="mt-8 text-sm font-bold uppercase tracking-[0.2em] text-[#009ee9]">
             Detail lekcie
