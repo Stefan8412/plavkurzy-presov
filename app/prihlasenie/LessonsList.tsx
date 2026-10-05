@@ -92,7 +92,7 @@ export default function LessonsList({
 
                 {isCancelled ? (
                   <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                    Zrušená
+                    Zrušená – sanitácia
                   </span>
                 ) : lesson.isAbsent ? (
                   <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700">

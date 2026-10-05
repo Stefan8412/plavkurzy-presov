@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
@@ -132,22 +131,25 @@ export default function Home() {
             <div className="absolute -left-8 -top-8 h-32 w-32 rounded-full bg-[#fbbf24]/30 blur-2xl" />
             <div className="absolute -bottom-10 -right-8 h-40 w-40 rounded-full bg-[#009ee9]/20 blur-3xl" />
 
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] bg-sky-200 shadow-2xl">
-              <Image
-                src="/images/hero-feddy.jpg"
-                alt="Plavecká škola FEDDY"
-                fill
-                priority
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-cover"
-              />
-            </div>
-
-            <div className="absolute -bottom-5 left-6 rounded-2xl bg-white px-5 py-4 shadow-lg">
-              <p className="text-sm font-semibold text-slate-500">
-                Plavecká škola
-              </p>
-              <p className="mt-1 text-lg font-bold text-[#071b55]">Prešov</p>
+            <div className="relative overflow-hidden rounded-[2rem] bg-white p-4 shadow-2xl">
+              <div className="overflow-hidden rounded-2xl">
+                <iframe
+                  src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fplavaniepresov&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
+                  width="500"
+                  height="500"
+                  style={{
+                    border: "none",
+                    overflow: "hidden",
+                    width: "100%",
+                    maxWidth: "500px",
+                  }}
+                  scrolling="no"
+                  frameBorder="0"
+                  allowFullScreen
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  title="FEDDY Facebook"
+                />
+              </div>
             </div>
           </div>
         </div>
