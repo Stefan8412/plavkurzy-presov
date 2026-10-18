@@ -217,6 +217,14 @@ export default function Footer() {
           </p>
 
           <div className="flex flex-wrap gap-5">
+            <a
+              href="https://hancar.sk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition hover:text-white"
+            >
+              Vytvorené s ❤️ – hancar.sk
+            </a>
             <Link
               href="/ochrana-osobnych-udajov"
               className="transition hover:text-white"
