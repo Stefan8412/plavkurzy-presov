@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Script from "next/script";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 
@@ -131,23 +132,16 @@ export default function Home() {
             <div className="absolute -left-8 -top-8 h-32 w-32 rounded-full bg-[#fbbf24]/30 blur-2xl" />
             <div className="absolute -bottom-10 -right-8 h-40 w-40 rounded-full bg-[#009ee9]/20 blur-3xl" />
 
-            <div className="relative overflow-hidden rounded-[2rem] bg-white p-4 shadow-2xl">
-              <div className="overflow-hidden rounded-2xl">
-                <iframe
-                  src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fplavaniepresov&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
-                  width="500"
-                  height="500"
-                  style={{
-                    border: "none",
-                    overflow: "hidden",
-                    width: "100%",
-                    maxWidth: "500px",
-                  }}
-                  scrolling="no"
-                  frameBorder="0"
-                  allowFullScreen
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  title="FEDDY Facebook"
+            <div className="relative mx-auto w-full max-w-[420px] rounded-[2rem] bg-white p-3 shadow-2xl">
+              <div className="rounded-2xl">
+                <Script
+                  src="https://elfsightcdn.com/platform.js"
+                  strategy="afterInteractive"
+                />
+
+                <div
+                  className="elfsight-app-7bc2c40c-5152-4415-ae04-462b1ae9b24c"
+                  data-elfsight-app-lazy
                 />
               </div>
             </div>
