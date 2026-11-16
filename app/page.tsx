@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Script from "next/script";
+
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 
@@ -133,17 +133,28 @@ export default function Home() {
             <div className="absolute -bottom-10 -right-8 h-40 w-40 rounded-full bg-[#009ee9]/20 blur-3xl" />
 
             <div className="relative mx-auto w-full max-w-[420px] rounded-[2rem] bg-white p-3 shadow-2xl">
-              <div className="rounded-2xl">
-                <Script
-                  src="https://elfsightcdn.com/platform.js"
-                  strategy="afterInteractive"
-                />
-
-                <div
-                  className="elfsight-app-7bc2c40c-5152-4415-ae04-462b1ae9b24c"
-                  data-elfsight-app-lazy
+              <div className="overflow-hidden rounded-2xl">
+                <iframe
+                  title="Plávanie Prešov – Facebook"
+                  src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fplavaniepresov%2F&tabs=timeline&width=396&height=600&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false&locale=sk_SK"
+                  width="396"
+                  height="600"
+                  className="block w-full border-0"
+                  style={{ overflow: "hidden" }}
+                  scrolling="no"
+                  loading="lazy"
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowFullScreen
                 />
               </div>
+              <a
+                href="https://www.facebook.com/plavaniepresov/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 block text-center text-sm text-blue-700 hover:underline"
+              >
+                Otvoriť na Facebooku →
+              </a>
             </div>
           </div>
         </div>
